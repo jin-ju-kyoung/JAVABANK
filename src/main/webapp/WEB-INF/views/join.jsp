@@ -81,11 +81,11 @@
 </body>
 
 <script>
-	let idCheck = false; // 아이디 중복확인
-	let pwCheck = false; // 패스워드 일치
-	let mailCheck = false; // 메일 발송
-	let timeout = false; // 인증 타임아웃
-	let confirmCheck = false; // 인증확인
+	var idCheck = false; // 아이디 중복확인
+	var pwCheck = false; // 패스워드 일치
+	var mailCheck = false; // 메일 발송
+	var timeout = false; // 인증 타임아웃
+	var confirmCheck = false; // 인증확인
 
 	function validateName(input) {
 	    input.value = input.value.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣]/g, ''); //이름 정규식 한글 허용
@@ -299,11 +299,6 @@
 	
 	function finalCheck(){
 
-		console.log(idCheck); //t
-		console.log(pwCheck); //t
-		console.log(mailCheck); //t
-		console.log(timeout);
-		console.log(confirmCheck);//t
 		
 		if (idCheck && pwCheck && mailCheck && !timeout && confirmCheck) {
 		    return true;

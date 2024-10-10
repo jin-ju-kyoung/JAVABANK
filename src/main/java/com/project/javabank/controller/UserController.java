@@ -69,8 +69,8 @@ public class UserController {
 	
 	
 	@RequestMapping("/joinSuccess.do")
-	public String joinSuccess(Model model,@ModelAttribute UserDTO dto, @RequestParam("email") String emailFirst,
-            @RequestParam("emailDomain") String emailDomain) {
+	public String joinSuccess(Model model,@ModelAttribute UserDTO dto, @RequestParam("userEmail1") String emailFirst,
+            @RequestParam("userEmail2") String emailDomain) {
 		String fullEmail = emailFirst + emailDomain;
 	    dto.setUserEmail(fullEmail);
 	    
