@@ -2,6 +2,8 @@ package com.project.javabank.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -10,17 +12,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 import com.project.javabank.dto.UserDTO;
 import com.project.javabank.mapper.UserMapper;
 
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class UserController {
 
 	@Autowired
 	private UserMapper userMapper;
+	@Autowired
+	JavaMailSender mailSender;
 	
 	@GetMapping(value = { "/"})
 	public String index() {
@@ -99,6 +109,76 @@ public class UserController {
 		
 	    return "message";
 	}
+	
+	//회원가입 유효성검사
+	@ResponseBody
+	@RequestMapping("/checkId.ajax")
+	public String checkId(String userId) {
+		try {
+			int checkIdres = userMapper.checkId(userId);
+			if(checkIdres == 0) {
+				return "OK";
+			}else {
+				return "ERROR";
+			}
+		} catch(Exception e) {
+			System.out.println("아이디 중복확인 에러");
+			e.printStackTrace();
+			return "ERROR";
+		}		
+		
+	}
+	
+	@ResponseBody
+	@RequestMapping("/sendEmail.ajax")
+	public String sendEmail(HttpServletResponse resp, String mail1, String mail2) {
+		try {
+			String email = mail1 + mail2;
+			
+			// 인증코드
+			Random random = new Random();
+			String certiCode = String.valueOf(random.nextInt(900000) + 100000);
+			
+			// 쿠키
+			Cookie cookie = new Cookie("certiCode", certiCode);
+			cookie.setMaxAge(3*60);
+			cookie.setPath("/");
+			resp.addCookie(cookie);
+			
+			// 이메일 전송 로직
+			MimeMessage msg = mailSender.createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+			helper.setFrom("admin@javabank.com");
+			helper.setTo(email);
+	        helper.setSubject("JavaBank 이메일 인증번호입니다.");
+	        helper.setText("안녕하세요!! JavaBank 입니다.\n\n 이메일 인증번호 : " + certiCode
+	                + " \n\n 회원가입을 진행 하시려면 인증번호를 해당 칸에 입력해주세요.\n 이용해주셔서 감사합니다." + "\n\n --JavaBank--");
+	        mailSender.send(msg);	              
+			
+			return "OK";
+		}catch(Exception e){
+			e.printStackTrace();
+			return "ERROR";
+		}
+	}
+	
+	@ResponseBody
+	@RequestMapping("/confirmCode.ajax")
+	public String confirmCode(HttpServletRequest req, String inputCode) {
+		Cookie [] cookies = req.getCookies();
+		 if(cookies != null) {
+			 for(Cookie cookie : cookies) {
+				 if(cookie.getName().contentEquals("certiCode")) {
+					 if(cookie.getValue().equals(inputCode)) {
+						 return "OK";
+					 }
+				 }
+			 }
+		 }
+		 return "ERROR";
+		
+	}
+	
 	
 	
 	

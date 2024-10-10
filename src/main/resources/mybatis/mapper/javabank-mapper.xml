@@ -49,6 +49,11 @@
         )
     </insert>
     
+    <select id="checkId" parameterType="String" resultType="int">
+		select count(*) from javabankUser 
+		where userId = #{userId}
+	</select>
+    
     
     
 </mapper>

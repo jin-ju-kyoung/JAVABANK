@@ -25,7 +25,9 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request -> request
 					.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
 					.requestMatchers("/css/**", "/images/**", "/js/**").permitAll()
-					.requestMatchers("/", "/login.do", "/join.do", "/logout.do", "/joinSuccess.do").permitAll()
+					.requestMatchers("/", "/login.do", "/join.do", "/logout.do", 
+										"/joinSuccess.do", "checkId.ajax", "/sendEmail.ajax", 
+										"/favicon.ico", "/confirmCode.ajax", "/error").permitAll()
 					.anyRequest().authenticated()
 			)
 			.formLogin(form -> form					

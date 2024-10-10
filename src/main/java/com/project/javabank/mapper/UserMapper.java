@@ -41,6 +41,10 @@ public class UserMapper {
 		return sqlSession.selectOne("findByUserId", userid);
 	}
 	
+	public int checkId(String userId) {
+		return sqlSession.selectOne("checkId", userId);
+	}
+	
 	
 	
 	
