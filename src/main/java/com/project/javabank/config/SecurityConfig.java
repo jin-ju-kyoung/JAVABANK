@@ -1,0 +1,54 @@
+package com.project.javabank.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+import jakarta.servlet.DispatcherType;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+		
+		http	
+			
+			.authorizeHttpRequests(request -> request
+					.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+					.requestMatchers("/css/**", "/images/**", "/js/**").permitAll()
+					.requestMatchers("/", "/login.do", "/join.do", "/logout.do", "/joinSuccess.do").permitAll()
+					.anyRequest().authenticated()
+			)
+			.formLogin(form -> form					
+						.loginPage("/login.do")
+						.loginProcessingUrl("/login.do")
+						.usernameParameter("userid")
+						.passwordParameter("pw")
+						//.defaultSuccessUrl("/bankMain.do", true)
+						.successHandler(new CustomAuthenticationSuccessHandler()) // 커스토마이징 핸들러 사용
+						.failureUrl("/login.do?error=true")
+						.permitAll()
+			)
+			.logout(Customizer.withDefaults());
+
+
+		return http.build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	
+    }
+

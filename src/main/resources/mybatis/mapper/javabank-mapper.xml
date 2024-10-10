@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="mybatis.javabank.javabank-mapper">
+    <insert id="joinSuccess" parameterType="java.util.Map">
+         insert into javabankUser (userId, userPw, userName, userBirth, userEmail, userTel, userRoles, userRegDate)
+         	values (#{userId}, #{userPw}, #{userName}, #{userBirth}, #{userTel}, #{fullEmail},'USER', SYSDATE)
+    </insert>
+    
+    <select id="findByUserId" parameterType="String" resultType="UserDTO">
+		select * from javabankUser 
+		where userId = #{userid}
+    </select>
+    
+    <select id="getAccountCountByUserId" parameterType="String" resultType="int">
+    	select count(*) from javabankAccount where userId=#{userId}
+    </select>
+    
+    
+    <insert id="saveAccount" parameterType="map">
+    	INSERT INTO javabankAccount (
+            depositAccount,
+            userId,
+            depositPw,
+            accountCategory,
+            updateDate,
+            accountType,
+            deltaAmount,
+            accountBalance,
+            accountRegDate,
+            interestRate,
+            accountLimit,
+            mainAccount
+        ) 
+        VALUES (
+            #{depositAccount, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
+	        #{userId, jdbcType=VARCHAR},
+	        #{depositPw, jdbcType=NUMERIC},
+	        DEFAULT,
+	        SYSDATE,
+	        DEFAULT,
+	        DEFAULT,
+	        DEFAULT,
+	        SYSDATE,
+	        DEFAULT,
+	        #{accountLimit, jdbcType=NUMERIC},
+	        #{mainAccount, jdbcType=VARCHAR}
+        )
+    </insert>
+    
+    
+    
+</mapper>
