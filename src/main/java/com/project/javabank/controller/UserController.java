@@ -47,8 +47,12 @@ public class UserController {
 	}
 	
 	@RequestMapping("/login.do")
-	public String loginSuccess(HttpServletRequest req, Model model, @AuthenticationPrincipal UserDetails user) {
-		model.addAttribute("loginId", user.getUsername());
+	public String loginSuccess(HttpServletRequest req, Model model) {
+		// CSRF 토큰 꺼내기
+				CsrfToken csrfToken = (CsrfToken) req.getAttribute(CsrfToken.class.getName());
+		        
+				// CSRF 토큰 model 객체에 담아 뷰로 전달하기
+				model.addAttribute("_csrf", csrfToken);
 	    return "login";  // 로그인 성공 후 메인 페이지로 리다이렉트
 	}
 	

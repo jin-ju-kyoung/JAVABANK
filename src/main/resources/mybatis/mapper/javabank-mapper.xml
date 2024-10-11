@@ -14,33 +14,25 @@
     </select>
     
     <select id="getAccountCountByUserId" parameterType="String" resultType="int">
-    	select count(*) from javabankAccount where userId=#{userId}
+    	select count(*) from javabankDeposit where userId=#{userId}
     </select>
     
     
     <insert id="saveAccount" parameterType="map">
-    	INSERT INTO javabankAccount (
+    	INSERT INTO javabankDeposit (
             depositAccount,
             userId,
             depositPw,
-            accountCategory,
-            updateDate,
-            accountType,
-            deltaAmount,
-            accountBalance,
-            accountRegDate,
+            category,
+            regDate,
             interestRate,
-            accountLimit,
+            transactionLimit,
             mainAccount
         ) 
         VALUES (
             #{depositAccount, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
 	        #{userId, jdbcType=VARCHAR},
 	        #{depositPw, jdbcType=NUMERIC},
-	        DEFAULT,
-	        SYSDATE,
-	        DEFAULT,
-	        DEFAULT,
 	        DEFAULT,
 	        SYSDATE,
 	        DEFAULT,
