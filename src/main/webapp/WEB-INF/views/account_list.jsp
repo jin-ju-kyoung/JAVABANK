@@ -1,17 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" type="text/css" href="css/reset.css">
-	<link rel="stylesheet" type="text/css" href="css/style.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="js/script.js"></script>
-    <title>javabank</title>
-</head>
-<body>
+<%@ include file="index_top.jsp"%>
     <!-- s: content -->
     <section id="account_list" class="content">
         <div class="info_box bg_yellow">
@@ -56,5 +45,4 @@
         </div>
     </section>
     <!-- e: content -->
-</body>
-</html>
+<%@ include file="index_footer.jsp"%>

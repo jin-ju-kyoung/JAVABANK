@@ -25,7 +25,7 @@
             <div class="input_box">
             
                 <label>
-                    <input type="text" placeholder="ID" name="userid" required>
+                    <input type="text" placeholder="ID" name="userid" value="${cookie.saveId.value}" required>
                 </label>
                 <label>
                     <input type="password" placeholder="PASSWORD" name="pw" required>
@@ -47,7 +47,7 @@
             </div>
 
             <div class="join_box">
-                <a href="javascript:;">회원가입</a>
+                <a href="/join.do">회원가입</a>
                 <ul class="find_box">
                     <li><a href="javascript:;">아이디찾기</a></li>
                     <li><a href="javascript:;">비밀번호찾기</a></li>
