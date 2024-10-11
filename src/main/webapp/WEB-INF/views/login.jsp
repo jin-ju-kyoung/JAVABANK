@@ -34,8 +34,16 @@
             </div>
 
             <div class="save_box">
-                <label> 아이디저장<input type="checkbox">
+            	<label>
+                	<c:if test="${empty cookie['saveId']}">
+                		아이디 저장 <input type="checkbox" name="saveId">  
+                	</c:if>
+                	
+                	<c:if test="${not empty cookie['saveId']}">
+                		아이디 저장 <input type="checkbox" name="saveId" value="on" checked>  
+                    </c:if>
                 </label>
+                
             </div>
 
             <div class="join_box">

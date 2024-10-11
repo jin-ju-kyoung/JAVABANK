@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,8 +47,8 @@ public class UserController {
 	}
 	
 	@RequestMapping("/login.do")
-	public String loginSuccess(HttpServletRequest req, Model model) {
-	    // CSRF 토큰을 수동으로 추가하는 부분은 생략 가능
+	public String loginSuccess(HttpServletRequest req, Model model, @AuthenticationPrincipal UserDetails user) {
+		model.addAttribute("loginId", user.getUsername());
 	    return "login";  // 로그인 성공 후 메인 페이지로 리다이렉트
 	}
 	
@@ -177,6 +181,13 @@ public class UserController {
 		 }
 		 return "ERROR";
 		
+	}
+	
+	//로그아웃
+	@RequestMapping("/logout.do")
+	public String logout(HttpServletRequest req, HttpServletResponse resp) {
+		new SecurityContextLogoutHandler().logout(req, resp, SecurityContextHolder.getContext().getAuthentication());
+		return "login";
 	}
 	
 	
