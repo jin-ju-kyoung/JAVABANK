@@ -6,6 +6,7 @@ import java.util.Random;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BankMapper {
@@ -25,8 +26,7 @@ public class BankMapper {
 	            accountNumber.append("-");  // 마지막 그룹 뒤에는 '-'를 붙이지 않음
 	        }
 	    }
-	    //
-	    System.out.println("계좌번호 : "+ random);
+	    //System.out.println("계좌번호 : "+ random);
 
 	    return accountNumber.toString();
 	}
@@ -38,11 +38,42 @@ public class BankMapper {
 		return accountCount>0;
 	}
 	
-	public int saveAccount(Map<String, Object> params) {
-		//
-		System.out.println(params);
-		int res = sqlSession.insert("saveAccount", params);
-		return res;
-	}
+//	public int saveAccount(Map<String, Object> params) {
+//		//
+//		System.out.println(params);
+//		int res = sqlSession.insert("saveAccount", params);
+//		return res;
+//	}
+	
+	//계좌생성 & 계좌생성하면 바로 계좌에 0원 입금 트랜젝션
+	@Transactional  // 트랜잭션 적용
+    public int createAccountWithTransaction(Map<String, Object> params) {
+        // 계좌 생성
+        String accountNumber = generateAccountNumber();
+        params.put("accountNumber", accountNumber);  // 생성한 계좌번호를 파라미터에 추가
+
+        // 1. 계좌 정보 저장
+        int result = sqlSession.insert("saveAccount", params);
+        System.out.println("계좌 생성 결과: " + result);
+
+        // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
+        if (result > 0) {
+            Map<String, Object> transactionParams = Map.of(
+                "accountNumber", accountNumber,
+                "deltaAmount", 0.0,
+                "balance", 0.0,
+                "type", "개설",
+                "memo", "계좌 개설"
+            );
+            int transactionResult = sqlSession.insert("saveInitialTransaction", transactionParams);
+            System.out.println("거래 내역 생성 결과: " + transactionResult);
+
+            if (transactionResult <= 0) {
+                throw new RuntimeException("거래 내역 추가에 실패했습니다.");  // 트랜잭션 롤백을 위해 예외 발생
+            }
+        }
+
+        return result;
+    }
 	
 }

@@ -75,11 +75,11 @@ public class BankController {
 	    params.put("depositPw", depositPw);              // 비밀번호
 	    params.put("accountLimit", accountLimit);        // 이체 한도 (숫자 값)
 	    params.put("userId", user.getUsername());        // 사용자 아이디
-	    params.put("depositAccount", accountNumber);     // 계좌 번호
+	    params.put("accountNumber", accountNumber);     // 계좌 번호
 	    params.put("mainAccount", mainAccount);          // 주계좌 여부
 
 	    // 데이터 저장 로직 호출
-	    int res = bankMapper.saveAccount(params);
+	    int res = bankMapper.createAccountWithTransaction(params);
 
 	    // 계좌 생성 후 "add_account" 페이지로 이동
 	    model.addAttribute("accountNumber", accountNumber);

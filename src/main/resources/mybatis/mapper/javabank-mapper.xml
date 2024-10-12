@@ -30,7 +30,7 @@
             mainAccount
         ) 
         VALUES (
-            #{depositAccount, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
+            #{accountNumber, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
 	        #{userId, jdbcType=VARCHAR},
 	        #{depositPw, jdbcType=NUMERIC},
 	        DEFAULT,
@@ -41,10 +41,17 @@
         )
     </insert>
     
+    <insert id="saveInitialTransaction">
+        INSERT INTO javabankDtransaction (accountSeq, depositAccount, deltaAmount, balance, type, memo)
+        VALUES (javabankDtransaction_seq.nextval, #{accountNumber}, #{deltaAmount}, #{balance}, #{type}, #{memo})
+    </insert>
+    
     <select id="checkId" parameterType="String" resultType="int">
 		select count(*) from javabankUser 
 		where userId = #{userId}
 	</select>
+	
+	
     
     
     
