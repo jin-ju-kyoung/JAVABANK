@@ -1,6 +1,7 @@
 package com.project.javabank.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.project.javabank.dto.DepositDTO;
+import com.project.javabank.dto.ProductDTO;
 import com.project.javabank.mapper.BankMapper;
 
 @Controller
@@ -23,17 +26,43 @@ public class BankController {
 	private BankMapper bankMapper;
 	
 	@GetMapping("/bankMain.do")
-	public String bankMain(@AuthenticationPrincipal UserDetails user,
-			@RequestParam(value="javabank", required=false) String javabank, Model model) {
+	public String bankMain(@AuthenticationPrincipal UserDetails user, Model model) {
 			// 로그인 정보 꺼내기
-			model.addAttribute("loginId", user.getUsername());
+			String loginId = user.getUsername();
+			model.addAttribute("loginId", loginId);
 			model.addAttribute("loginRoles", user.getAuthorities());
 			
-			if (javabank != null) {
-				model.addAttribute("msg", user.getUsername()+"님 환영합니다.");
-			} 
+			// 입출금 계좌 정보 조회
+		    List<DepositDTO> accountList = bankMapper.getAccountsByUserId(loginId);
 			
+		    if (accountList.isEmpty()) {
+		        model.addAttribute("hasAccount", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasAccount", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("accountList", accountList); // 계좌 목록을 모델에 추가
+		    }
+		    //System.out.println(accountList);
+		    
+		    //예금 계좌 정보 조회 
+		    List<ProductDTO> depositList = bankMapper.getDepositsByUserId(loginId);
 			
+		    if (depositList.isEmpty()) {
+		        model.addAttribute("hasDeposit", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasDeposit", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("depositList", depositList); // 계좌 목록을 모델에 추가
+		    }
+		    
+		    //적금 계좌 정보 조회
+		    List<ProductDTO> InstallmentSavingsList = bankMapper.getSavingsByUserId(loginId);
+			
+		    if (InstallmentSavingsList.isEmpty()) {
+		        model.addAttribute("hasSavings", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasSavings", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("InstallmentSavingsList", InstallmentSavingsList); // 계좌 목록을 모델에 추가
+		    }
+		    
 			return "index";
 	}
 	
@@ -101,6 +130,8 @@ public class BankController {
 		@RequestMapping("/accountList.do")
 		public String accountList(Model model, @AuthenticationPrincipal UserDetails user) {
 			model.addAttribute("loginId", user.getUsername());
+			
+			
 			
 			return"account_list";
 		}

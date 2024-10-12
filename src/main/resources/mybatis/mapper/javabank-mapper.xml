@@ -51,7 +51,90 @@
 		where userId = #{userId}
 	</select>
 	
+	<select id="getAccountsByUserId" parameterType="String" resultType="DepositDTO">
+		SELECT 
+            D.depositAccount,    -- 계좌 번호
+            D.category,          -- 계좌 구분
+            T.balance,           -- 계좌 잔액
+            D.regDate,           -- 계좌 개설일
+            D.interestRate,      -- 이자율
+            D.transactionLimit,  -- 이체한도
+            D.mainAccount,       -- 주거래 여부
+            T.accountSeq,        -- 거래 번호
+            T.updateDate,        -- 거래일
+            T.type,              -- 거래 유형 (개설/입금/출금 등)
+            T.memo,              -- 적요
+            T.deltaAmount        -- 변동 금액
+        FROM 
+            javabankDeposit D
+        LEFT JOIN 
+            javabankDtransaction T 
+        ON 
+            D.depositAccount = T.depositAccount
+        WHERE 
+            D.userId = #{loginId}
+	</select>
 	
+	<select id="getDepositsByUserId" parameterType="String" resultType="ProductDTO">
+			SELECT 
+		        P.productAccount,   -- 계좌 번호
+		        P.productPw,        -- 계좌 비밀번호
+		        P.userId,           -- 아이디
+		        P.category,         -- 상품 구분 (정기예금/정기적금)
+		        P.autoTransferDate, -- 자동이체일
+		        P.monthlyPayment,   -- 월납입 금액
+		        P.regDate,          -- 계좌 개설일
+		        P.expiryDate,       -- 만기일자
+		        P.interestRate,     -- 이자율
+		        P.depositAccount,   -- 자동이체 통장
+		        T.productSeq,       -- 이체 번호
+		        T.updateDate,       -- 변동일자
+		        T.type,             -- 거래 구분
+		        T.memo,             -- 적요
+		        T.deltaAmount,      -- 변동 금액
+		        T.balance           -- 잔액
+		    FROM 
+		        javabankProduct P
+		    LEFT JOIN 
+		        JB_Ptransaction T 
+		    ON 
+		        P.productAccount = T.productAccount
+		    WHERE 
+		        P.category = '정기예금'  -- 정기예금만 조회
+		    AND 
+		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
+	</select>
+	
+	
+	<select id="getSavingsByUserId" parameterType="String" resultType="ProductDTO">
+			SELECT 
+		        P.productAccount,   -- 계좌 번호
+		        P.productPw,        -- 계좌 비밀번호
+		        P.userId,           -- 아이디
+		        P.category,         -- 상품 구분 (정기예금/정기적금)
+		        P.autoTransferDate, -- 자동이체일
+		        P.monthlyPayment,   -- 월납입 금액
+		        P.regDate,          -- 계좌 개설일
+		        P.expiryDate,       -- 만기일자
+		        P.interestRate,     -- 이자율
+		        P.depositAccount,   -- 자동이체 통장
+		        T.productSeq,       -- 이체 번호
+		        T.updateDate,       -- 변동일자
+		        T.type,             -- 거래 구분
+		        T.memo,             -- 적요
+		        T.deltaAmount,      -- 변동 금액
+		        T.balance           -- 잔액
+		    FROM 
+		        javabankProduct P
+		    LEFT JOIN 
+		        JB_Ptransaction T 
+		    ON 
+		        P.productAccount = T.productAccount
+		    WHERE 
+		        P.category = '정기적금'  -- 정기예금만 조회
+		    AND 
+		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
+	</select>
     
     
     

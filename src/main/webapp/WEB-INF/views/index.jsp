@@ -1,64 +1,115 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ include file="index_top.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
     <!-- s: content -->
     <section id="main" class="content">
         <div class="account_box">
             <p class="account_tit">내 계좌</p>
             <ul>
-                <li class="nolist">
-                    <a href="/addAccount.do">
-                        <p>등록된 계좌가 없습니다. 계좌를 추가해주세요.</p>
-                        <div class="img_box">
-                            <img src="/images/icons/account.png">
-                        </div>
-                    </a>
-                </li>
-                <li class="account_item bg_yellow">
-                    <div class="txt_box">
-                        <p class="account_name">계좌명(입출금/예금/적금)</p>
-                        <p class="account_number">0000-0000-0000-0000</p>
-                        <p class="account_amount">0원</p>
-                    </div>
-                    <div class="btn_box">
-                        <button type="button">조회</button>
-                        <button type="button">이체</button>
-                    </div>
-                </li>
+                <c:choose>
+                <c:when test="${!hasAccount}">
+                    <!-- 계좌가 없을 때 -->
+                    <li class="nolist">
+                        <a href="/addAccount.do">
+                            <p>등록된 계좌가 없습니다. 계좌를 추가해주세요.</p>
+                            <div class="img_box">
+                                <img src="/images/icons/account.png">
+                            </div>
+                        </a>
+                    </li>
+                </c:when>
+                <c:otherwise>
+                    <!-- 계좌가 있을 때 -->
+                    <c:forEach var="account" items="${accountList}">
+                        <li class="account_item bg_yellow">
+                            <div class="txt_box">
+                                <p class="account_name">${account.category}</p>
+                                <p class="account_number">${account.depositAccount}</p>
+                                <p class="account_amount"><fmt:formatNumber value="${account.balance}" />원</p>
+								<p class="account_transaction">최근 거래: ${account.type} ( <fmt:formatNumber value="${account.deltaAmount}" />원 )</p>
+                            </div>
+                            <div class="btn_box">
+                                <button type="button">조회</button>
+                                <button type="button">이체</button>
+                            </div>
+                        </li>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
             </ul>
         </div>
 
         <div class="account_box">
             <p class="account_tit">예금</p>
             <ul>
-                <li class="account_item bg_green">
-                    <div class="txt_box">
-                        <p class="account_name">계좌명(입출금/예금/적금)</p>
-                        <p class="account_number">계좌번호</p>
-                        <p class="account_amount">0원</p>
-                    </div>
-                    <div class="btn_box">
-                        <button type="button">조회</button>
-                        <button type="button">이체</button>
-                    </div>
-                </li>
+                <c:choose>
+                <c:when test="${!hasDeposit}">
+                    <!-- 계좌가 없을 때 -->
+                    <li class="nolist">
+                        <a href="">
+                            <p>등록된 계좌가 없습니다. 얘금계좌를 추가해주세요.</p>
+                            <div class="img_box">
+                                <img src="/images/icons/account.png">
+                            </div>
+                        </a>
+                    </li>
+                </c:when>
+                <c:otherwise>
+                    <!-- 계좌가 있을 때 -->
+                    <c:forEach var="deposit" items="${depositList}">
+                        <li class="account_item bg_green">
+                            <div class="txt_box">
+                                <p class="account_name"></p>
+                                <p class="account_number"></p>
+                                <p class="account_amount"><fmt:formatNumber value="" />원</p>
+								<p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p>
+                            </div>
+                            <div class="btn_box">
+                                <button type="button">조회</button>
+                                <button type="button">이체</button>
+                            </div>
+                        </li>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
             </ul>
         </div>
 
         <div class="account_box">
             <p class="account_tit">적금</p>
             <ul>
-                <li class="account_item bg_blue">
-                    <div class="txt_box">
-                        <p class="account_name" style="color: #dbdbdb;">계좌명(입출금/예금/적금)</p>
-                        <p class="account_number" style="color: #c3c1c1;">계좌번호</p>
-                        <p class="account_amount" style="color: #dbdbdb;">0원</p>
-                    </div>
-                    <div class="btn_box">
-                        <button type="button">조회</button>
-                        <button type="button">이체</button>
-                    </div>
-                </li>
+                <c:choose>
+                <c:when test="${!hasSavings}">
+                    <!-- 계좌가 없을 때 -->
+                    <li class="nolist">
+                        <a href="">
+                            <p>등록된 계좌가 없습니다. 적금계좌를 추가해주세요.</p>
+                            <div class="img_box">
+                                <img src="/images/icons/account.png">
+                            </div>
+                        </a>
+                    </li>
+                </c:when>
+                <c:otherwise>
+                    <!-- 계좌가 있을 때 -->
+                    <c:forEach var="saving" items="${InstallmentSavingsList}">
+                        <li class="account_item bg_blue">
+                            <div class="txt_box">
+                                <p class="account_name"></p>
+                                <p class="account_number"></p>
+                                <p class="account_amount"><fmt:formatNumber value="" />원</p>
+								<p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p>
+                            </div>
+                            <div class="btn_box">
+                                <button type="button">조회</button>
+                                <button type="button">이체</button>
+                            </div>
+                        </li>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
             </ul>
         </div>
 

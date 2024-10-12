@@ -36,4 +36,51 @@ public class DepositDTO {
 
 	    public String getMainAccount() { return mainAccount; }
 	    public void setMainAccount(String mainAccount) { this.mainAccount = mainAccount; }
+	    
+	    //
+	    private int accountSeq;          // 이체번호
+	    private Date updateDate;         // 변동일자
+	    private String type;             // 거래 구분 (개설/입금/출금 등)
+	    private String memo;             // 적요
+	    private double deltaAmount;      // 변동 금액
+	    private double balance;
+	    
+	    
+	    
+		public double getBalance() {
+			return balance;
+		}
+		public void setBalance(double balance) {
+			this.balance = balance;
+		}
+		public int getAccountSeq() {
+			return accountSeq;
+		}
+		public void setAccountSeq(int accountSeq) {
+			this.accountSeq = accountSeq;
+		}
+		public Date getUpdateDate() {
+			return updateDate;
+		}
+		public void setUpdateDate(Date updateDate) {
+			this.updateDate = updateDate;
+		}
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		public String getMemo() {
+			return memo;
+		}
+		public void setMemo(String memo) {
+			this.memo = memo;
+		}
+		public double getDeltaAmount() {
+			return deltaAmount;
+		}
+		public void setDeltaAmount(double deltaAmount) {
+			this.deltaAmount = deltaAmount;
+		}
 	}
