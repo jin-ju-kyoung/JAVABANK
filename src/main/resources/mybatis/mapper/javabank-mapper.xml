@@ -73,6 +73,12 @@
             D.depositAccount = T.depositAccount
         WHERE 
             D.userId = #{loginId}
+        AND 
+	        T.updateDate = (
+	            SELECT MAX(T2.updateDate)
+	            FROM javabankDtransaction T2
+	            WHERE T2.depositAccount = T.depositAccount
+	        )
 	</select>
 	
 	<select id="getDepositsByUserId" parameterType="String" resultType="ProductDTO">
