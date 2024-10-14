@@ -84,4 +84,13 @@ public class BankMapper {
 	public List<ProductDTO> getSavingsByUserId(String loginId){
 		return sqlSession.selectList("getSavingsByUserId",loginId);
 	}
+	
+	public int transferMoneyOk(Map<String, Object> params) {
+		System.out.println("송금데이터 : " + params);
+		return sqlSession.insert("transferMoneyOk",params);
+	}
+	
+	
+	
+	
 }

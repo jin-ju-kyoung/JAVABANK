@@ -30,10 +30,18 @@
                                 <p class="account_amount"><fmt:formatNumber value="${account.balance}" />원</p>
 								<p class="account_transaction">최근 거래: ${account.type} ( <fmt:formatNumber value="${account.deltaAmount}" />원 )</p>
                             </div>
-                            <div class="btn_box">
-                                <button type="button">조회</button>
-                                <button type="button">이체</button>
-                            </div>
+                            
+                             <div class="btn_box">
+					            <form action="/transfer.do" method="POST">
+					            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+					                <input type="hidden" name="category" value="${account.category}">
+					                <input type="hidden" name="depositAccount" value="${account.depositAccount}">
+					                <input type="hidden" name="balance" value="${account.balance}">
+					                <input type="hidden" name="type" value="${account.type}">
+					                <input type="hidden" name="deltaAmount" value="${account.deltaAmount}">
+					                <button type="submit">이체</button>
+					            </form>
+					        </div>
                         </li>
                     </c:forEach>
                 </c:otherwise>

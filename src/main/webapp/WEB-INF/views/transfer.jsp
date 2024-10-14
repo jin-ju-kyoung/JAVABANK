@@ -1,23 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" type="text/css" href="css/reset.css">
-	<link rel="stylesheet" type="text/css" href="css/style.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="js/script.js"></script>
-    <title>javabank</title>
-</head>
-<body>
+<%@ include file="index_top.jsp"%>
     <!-- s: content -->
     <section id="transfer" class="content">
-        <form name="f" action="" method="post">
+        <form name="f" action="/transferMoney.do" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <div class="bank_info">
                 <p>송금할 계좌를 입력해주세요.</p>
-                <select class="bank">
+                <select class="bank" name="bankName">
                     <option value="신한">신한</option>
                     <option value="국민">국민</option>
                     <option value="기업">기업</option>
@@ -30,9 +20,10 @@
                     <option value="새마을">새마을</option>
                 </select>
                 <label>
-                    <input type="text" name="" value="" placeholder="계좌번호 직접입력" required>
+                    <input type="text" name="transferredAccount" value="" placeholder="계좌번호 직접입력" required
+                    	class="accountNumberInput">
                 </label>
-                <button class="bg_yellow" type="button">다음</button>
+                <button class="bg_yellow" type="submit">다음</button>
             </div>
         </form>
 
@@ -68,5 +59,45 @@
         </div>
     </section>
     <!-- e: content -->
-</body>
-</html>
+<%@ include file="index_footer.jsp"%>
+
+<script>
+class AccountNumberFormatter {
+    constructor(inputElement) {
+        this.inputElement = inputElement;
+        this.maxLength = 16;  // 최대 16자리 숫자로 제한
+        this.initialize();
+    }
+
+    initialize() {
+        // 입력 이벤트 리스너 추가
+        this.inputElement.addEventListener('input', () => {
+            this.formatAccountNumber();
+        });
+    }
+
+    formatAccountNumber() {
+        // 숫자만 남기기
+        let value = this.inputElement.value.replace(/\D/g, '');
+
+        // 16자리까지만 허용
+        if (value.length > this.maxLength) {
+            value = value.substring(0, this.maxLength);
+        }
+
+        // 4자리마다 하이픈 추가
+        const formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1-');
+
+        // input 필드에 하이픈이 추가된 값 반영
+        this.inputElement.value = formattedValue;
+    }
+}
+
+// 페이지 로드 시 계좌번호 입력 필드에 대해 AccountNumberFormatter 클래스를 적용
+document.addEventListener('DOMContentLoaded', () => {
+    const accountInput = document.querySelector('.accountNumberInput');
+    if (accountInput) {
+        new AccountNumberFormatter(accountInput);
+    }
+});
+</script>

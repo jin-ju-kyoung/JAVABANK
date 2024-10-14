@@ -135,6 +135,11 @@
 		    AND 
 		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
 	</select>
+	
+	<insert id="transferMoneyOk" >
+		INSERT INTO javabankDtransaction (accountSeq, depositAccount, deltaAmount, balance, type, memo, transferredName, transferredAccount )
+        VALUES (javabankDtransaction_seq.nextval, #{depositAccount}, #{deltaAmount}, #{balance}, '출금', #{memo, jdbcType=VARCHAR} ,'임시이름',#{transferredAccount})
+	</insert>
     
     
     

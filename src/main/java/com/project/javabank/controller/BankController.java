@@ -19,6 +19,8 @@ import com.project.javabank.dto.DepositDTO;
 import com.project.javabank.dto.ProductDTO;
 import com.project.javabank.mapper.BankMapper;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class BankController {
 
@@ -148,5 +150,77 @@ public class BankController {
 	public String addDeposit(Model model, Authentication authentication) {
 		return"add_deposit";
 	}
+	
+	//입출금 송금 1단계 계좌 입력페이지
+	@RequestMapping("/transfer.do")
+	public String transfer(Model model, HttpSession session,
+					@RequestParam("category") String category,
+				    @RequestParam("depositAccount") String depositAccount,
+				    @RequestParam("balance") String balance,
+				    @RequestParam("deltaAmount") String deltaAmount) {
+		
+		session.setAttribute("depositAccount", depositAccount);
+        session.setAttribute("balance", balance);
+		
+//		Map<String, Object> params = new HashMap<>();
+//		params.put("category", category);
+//		params.put("depositAccount", depositAccount);
+//		params.put("balance", balance);
+//		params.put("type", type);
+//		params.put("deltaAmount", deltaAmount);
+//		
+		
+		
+		return "transfer";
+	}
+	
+	//입출금 송금 2단계 금액입력
+	@RequestMapping("/transferMoney.do")
+	public String transferMoney(@RequestParam("bankName") String bankName,
+	        @RequestParam("transferredAccount") String transferredAccount,
+	        HttpSession session) {
+		session.setAttribute("bankName", bankName);
+        session.setAttribute("transferredAccount", transferredAccount);
+        
+		return "transfer_money";
+	}
+	
+	//입출금 송금 3단계 송금정보 디비로 전송
+		@RequestMapping("/transferMoneyOk.do")
+		public String transferMoneyOk(@RequestParam("deltaAmount") String deltaAmount,
+		        HttpSession session, Model model) {
+			
+			String balanceStr = (String) session.getAttribute("balance");
+			// balance와 deltaAmount를 숫자로 변환
+		    double balance = Double.parseDouble(balanceStr); // balance는 세션에 저장된 원래 잔액
+		    double delta = Double.parseDouble(deltaAmount);  // deltaAmount는 이체할 금액
+
+		    // balance에서 deltaAmount를 차감
+		    double newBalance = balance - delta;
+			
+			Map<String, Object> params = new HashMap<>();
+			params.put("bankName", session.getAttribute("bankName"));
+			params.put("depositAccount", session.getAttribute("depositAccount"));
+			params.put("balance", newBalance);
+			params.put("transferredAccount", session.getAttribute("transferredAccount"));
+			params.put("deltaAmount", deltaAmount);
+			
+			
+			// 데이터 저장 로직 호출
+		    int res = bankMapper.transferMoneyOk(params);
+	        
+			if (res > 0) {
+		         model.addAttribute("msg", "성공적으로 송금되었습니다.");
+		         model.addAttribute("url", "bankMain.do");
+		    } else {
+		         model.addAttribute("msg", "송금 실패했습니다.");
+		         model.addAttribute("url", "bankMain.do");
+		    }
+
+		    return "message";
+		}
+		
+		
+	
 	
 }
