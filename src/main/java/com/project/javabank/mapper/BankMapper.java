@@ -86,8 +86,13 @@ public class BankMapper {
 	}
 	
 	public int transferMoneyOk(Map<String, Object> params) {
-		System.out.println("송금데이터 : " + params);
+		//System.out.println("송금데이터 : " + params);
 		return sqlSession.insert("transferMoneyOk",params);
+	}
+	
+	public int getTodayTransferTotalAmount(String userId) {
+		
+		return sqlSession.selectOne("getTodayTransferTotalAmount",userId);
 	}
 	
 	

@@ -146,6 +146,15 @@
 		INSERT INTO javabankDtransaction (accountSeq, depositAccount, deltaAmount, balance, type, memo, transferredName, transferredAccount )
         VALUES (javabankDtransaction_seq.nextval, #{depositAccount}, #{deltaAmount}, #{balance}, '출금', #{memo, jdbcType=VARCHAR} ,'임시이름',#{transferredAccount})
 	</insert>
+	
+	<select id="getTodayTransferTotalAmount" parameterType="String" resultType="int">
+		SELECT SUM(T.deltaAmount) AS todayTransferTotal
+	    FROM javabankDtransaction T
+	    JOIN javabankDeposit D ON T.depositAccount = D.depositAccount
+	    WHERE D.userId = #{userId}
+	      AND T.type = '출금'
+	      AND TO_CHAR(T.updateDate, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+	</select>
     
     
     

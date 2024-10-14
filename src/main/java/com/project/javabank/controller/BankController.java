@@ -188,13 +188,26 @@ public class BankController {
 	//입출금 송금 3단계 송금정보 디비로 전송
 		@RequestMapping("/transferMoneyOk.do")
 		public String transferMoneyOk(@RequestParam("deltaAmount") String deltaAmount,
-		        HttpSession session, Model model) {
+		        HttpSession session, Model model, @AuthenticationPrincipal UserDetails user) {
 			
+			String userId = user.getUsername();
 			String balanceStr = (String) session.getAttribute("balance");
 			// balance와 deltaAmount를 숫자로 변환
 		    double balance = Double.parseDouble(balanceStr); // balance는 세션에 저장된 원래 잔액
 		    double delta = Double.parseDouble(deltaAmount);  // deltaAmount는 이체할 금액
-
+		    
+		 // 오늘의 총 이체 금액을 DB에서 조회 (예시: bankService.getTodayTransferTotalAmount)
+		    int todayTransferTotal = bankMapper.getTodayTransferTotalAmount(userId);
+		    
+		 // 이체 한도 확인 (10,000,000원)
+		    int transferLimit = 10000000;
+		    // 오늘의 이체 총액과 추가로 송금할 금액의 합을 확인
+		    if (todayTransferTotal + delta > transferLimit) {
+		        model.addAttribute("msg", "이체 한도를 초과했습니다. 오늘 남은 이체 가능 금액: " + (transferLimit - todayTransferTotal) + "원" );
+		        model.addAttribute("url", "/bankMain.do");
+		        return "message";
+		    }
+		    
 		    // balance에서 deltaAmount를 차감
 		    double newBalance = balance - delta;
 			

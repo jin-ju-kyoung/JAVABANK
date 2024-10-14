@@ -31,6 +31,7 @@
 								<p class="account_transaction">최근 거래: ${account.type} ( <fmt:formatNumber value="${account.deltaAmount}" />원 )</p>
                             </div>
                             
+                            
                              <div class="btn_box">
 					            <form action="/transfer.do" method="POST">
 					            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
@@ -44,6 +45,7 @@
 					        </div>
                         </li>
                     </c:forEach>
+                    <button type="button" onclick="window.location.href='/addAccount.do'">계좌 추가</button>
                 </c:otherwise>
             </c:choose>
             </ul>
