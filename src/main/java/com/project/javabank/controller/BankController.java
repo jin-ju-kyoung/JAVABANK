@@ -46,7 +46,7 @@ public class BankController {
 		        model.addAttribute("hasAccount", true); // 계좌가 있으면 true 설정
 		        model.addAttribute("accountList", accountList); // 계좌 목록을 모델에 추가
 		    }
-		    //System.out.println(accountList);
+		    
 		    
 		    //예금 계좌 정보 조회 
 		    List<ProductDTO> depositList = bankMapper.getDepositsByUserId(loginId);
@@ -57,7 +57,7 @@ public class BankController {
 		        model.addAttribute("hasDeposit", true); // 계좌가 있으면 true 설정
 		        model.addAttribute("depositList", depositList); // 계좌 목록을 모델에 추가
 		    }
-		    
+		  System.out.println(depositList);
 		    //적금 계좌 정보 조회
 		    List<ProductDTO> InstallmentSavingsList = bankMapper.getSavingsByUserId(loginId);
 			

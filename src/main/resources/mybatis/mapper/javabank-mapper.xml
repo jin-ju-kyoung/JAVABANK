@@ -102,11 +102,11 @@
 		    FROM 
 		        javabankProduct P
 		    LEFT JOIN 
-		        JB_Ptransaction T 
+		        javabankPtransaction T 
 		    ON 
 		        P.productAccount = T.productAccount
 		    WHERE 
-		        P.category = '정기예금'  -- 정기예금만 조회
+		        P.category = '예금'  -- 정기예금만 조회
 		    AND 
 		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
 	</select>
@@ -133,11 +133,11 @@
 		    FROM 
 		        javabankProduct P
 		    LEFT JOIN 
-		        JB_Ptransaction T 
+		        javabankPtransaction T 
 		    ON 
 		        P.productAccount = T.productAccount
 		    WHERE 
-		        P.category = '정기적금'  -- 정기예금만 조회
+		        P.category = '적금'  -- 정기예금만 조회
 		    AND 
 		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
 	</select>

@@ -71,10 +71,10 @@
                     <c:forEach var="deposit" items="${depositList}">
                         <li class="account_item bg_green">
                             <div class="txt_box">
-                                <p class="account_name"></p>
-                                <p class="account_number"></p>
-                                <p class="account_amount"><fmt:formatNumber value="" />원</p>
-								<p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p>
+                                <p class="account_name">${deposit.category}</p>
+                                <p class="account_number">${deposit.productAccount}</p>
+                                <p class="account_amount"><fmt:formatNumber value="${deposit.balance}" />원</p>
+								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
                                 <button type="button">조회</button>
@@ -107,10 +107,10 @@
                     <c:forEach var="saving" items="${InstallmentSavingsList}">
                         <li class="account_item bg_blue">
                             <div class="txt_box">
-                                <p class="account_name"></p>
-                                <p class="account_number"></p>
-                                <p class="account_amount"><fmt:formatNumber value="" />원</p>
-								<p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p>
+                                <p class="account_name">${saving.category}</p>
+                                <p class="account_number">${saving.productAccount}</p>
+                                <p class="account_amount"><fmt:formatNumber value="${saving.balance}" />원</p>
+								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
                                 <button type="button">조회</button>
