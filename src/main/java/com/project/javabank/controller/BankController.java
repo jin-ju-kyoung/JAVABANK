@@ -148,6 +148,57 @@ public class BankController {
 		return"add_installment_saving";
 	}
 	
+	// 적금계좌개설
+	@RequestMapping("/addInstallmentSavingOk.do")
+	public String addInstallmentSavingOk(Model model, 
+			                  @AuthenticationPrincipal UserDetails user,
+			                  @RequestParam("productPw") String productPw, 
+			                  @RequestParam("monthlyPayment") String monthlyPayment,
+			                  @RequestParam("expiryDate") String expiryDate,
+			                  @RequestParam("interestRate") BigDecimal interestRate,
+			                  @RequestParam("autoTransferDate") BigDecimal autoTransferDate) {
+				
+				// String으로 받은 만기일자를 LocalDate로 변환
+		        LocalDate expiryLocalDate = LocalDate.parse(expiryDate);
+
+			    // 계좌 번호 랜덤 생성
+			    String productAccount = bankMapper.generateAccountNumber();
+
+			    // 사용자의 주계좌 조회
+			    String depositAccount = bankMapper.mainAccount(user.getUsername());
+
+			    // 계좌 정보 Map에 저장
+			    Map<String, Object> params = new HashMap<>();
+			    params.put("productPw", productPw);              
+			    params.put("productAccount", productAccount);
+			    params.put("monthlyPayment", monthlyPayment);        
+			    params.put("userId", user.getUsername());        
+			    params.put("expiryDate", expiryLocalDate);     
+			    params.put("interestRate", interestRate);          
+			    params.put("depositAccount", depositAccount);          
+			    params.put("autoTransferDate", autoTransferDate);          
+			    params.put("category", "적금");
+
+			    // 데이터 저장 로직 호출
+			    int res = bankMapper.createSavingWithTransaction(params);
+
+
+			    if (res > 0) {
+			         model.addAttribute("msg", "계좌가 성공적으로 생성되었습니다.");
+			         model.addAttribute("url", "savingList.do");
+			    } else {
+			         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
+			         model.addAttribute("url", "bankMain.do");
+			    }
+
+			    return "message";  // 결과를 표시할 메시지 페이지로 이동
+			}
+	
+	@RequestMapping("/savingList.do")
+	public String savingList(){
+		return "saving_list";
+	}
+	
 	//정기예금계좌개설
 	@RequestMapping("/addDeposit.do")
 	public String addDeposit(Model model, @AuthenticationPrincipal UserDetails user) {

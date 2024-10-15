@@ -7,7 +7,7 @@ public class ProductDTO {
     private int productPw;           // 계좌 비밀번호
     private String userId;           // 아이디 (FK)
     private String category;         // 상품 구분 (정기예금/정기적금)
-    private Date autoTransferDate;   // 자동이체일
+    private int autoTransferDate;   // 자동이체일
     private double monthlyPayment;   // 월납입금액
     private Date regDate;            // 계좌 개설일
     private Date expiryDate;         // 만기일자
@@ -27,10 +27,14 @@ public class ProductDTO {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    public Date getAutoTransferDate() { return autoTransferDate; }
-    public void setAutoTransferDate(Date autoTransferDate) { this.autoTransferDate = autoTransferDate; }
 
-    public double getMonthlyPayment() { return monthlyPayment; }
+    public int getAutoTransferDate() {
+		return autoTransferDate;
+	}
+	public void setAutoTransferDate(int autoTransferDate) {
+		this.autoTransferDate = autoTransferDate;
+	}
+	public double getMonthlyPayment() { return monthlyPayment; }
     public void setMonthlyPayment(double monthlyPayment) { this.monthlyPayment = monthlyPayment; }
 
     public Date getRegDate() { return regDate; }

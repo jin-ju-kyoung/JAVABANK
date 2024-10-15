@@ -191,5 +191,37 @@
 		  AND mainAccount = 'Y'
     </select>
     
+    <insert id="saveSaving" parameterType="map">
+    	INSERT INTO javabankProduct (
+            productAccount,
+            userId,
+            productPw,
+            category,
+            regDate,
+            expiryDate,
+            interestRate,
+            depositAccount,
+            autoTransferDate,
+            monthlyPayment
+        ) 
+        VALUES (
+            #{productAccount, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
+	        #{userId, jdbcType=VARCHAR},
+	        #{productPw, jdbcType=NUMERIC},
+	        #{category},
+	        SYSDATE,
+	        #{expiryDate},
+	        #{interestRate},
+	        #{mainAccount, jdbcType=VARCHAR},
+	        #{autoTransferDate},
+	        #{monthlyPayment}
+        )
+    </insert>
+    
+    <insert id="saveInitialTransactionSaving">
+        INSERT INTO javabankPtransaction (productSeq, productAccount,updateDate, deltaAmount, balance, type, memo)
+        VALUES (javabankPtransaction_seq.nextval, #{productAccount}, SYSDATE, #{deltaAmount}, #{balance}, #{type}, #{memo})
+    </insert>
+    
     
 </mapper>

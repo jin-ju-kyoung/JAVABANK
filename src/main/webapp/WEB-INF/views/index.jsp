@@ -40,6 +40,7 @@
 					                <input type="hidden" name="balance" value="${account.balance}">
 					                <input type="hidden" name="type" value="${account.type}">
 					                <input type="hidden" name="deltaAmount" value="${account.deltaAmount}">
+					                <button type="button">조회</button>
 					                <button type="submit">이체</button>
 					            </form>
 					        </div>

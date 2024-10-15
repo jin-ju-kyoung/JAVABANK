@@ -38,7 +38,7 @@ public class BankMapper {
 	public boolean checkIfUserHasAccount(String userId) {
 		int accountCount = sqlSession.selectOne("getAccountCountByUserId",userId);
 		//
-		System.out.println("계좌갯수 : "+accountCount);
+		//System.out.println("계좌갯수 : "+accountCount);
 		return accountCount>0;
 	}
 
@@ -51,7 +51,7 @@ public class BankMapper {
 
         // 1. 계좌 정보 저장
         int result = sqlSession.insert("saveAccount", params);
-        System.out.println("계좌 생성 결과: " + result);
+        //System.out.println("계좌 생성 결과: " + result);
 
         // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
         if (result > 0) {
@@ -63,7 +63,7 @@ public class BankMapper {
                 "memo", "계좌 개설"
             );
             int transactionResult = sqlSession.insert("saveInitialTransaction", transactionParams);
-            System.out.println("거래 내역 생성 결과: " + transactionResult);
+            //System.out.println("거래 내역 생성 결과: " + transactionResult);
 
             if (transactionResult <= 0) {
                 throw new RuntimeException("거래 내역 추가에 실패했습니다.");  // 트랜잭션 롤백을 위해 예외 발생
@@ -104,7 +104,7 @@ public class BankMapper {
 	public int createDepositWithTransaction(Map<String, Object> params) {
 		// 1. 계좌 정보 저장
         int result = sqlSession.insert("saveDeposit", params);
-        System.out.println("계좌 생성 결과: " + result);
+       // System.out.println("계좌 생성 결과: " + result);
 
         // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
         if (result > 0) {
@@ -116,7 +116,7 @@ public class BankMapper {
                 "memo", "예금 계좌 개설"
             );
             int transactionResult = sqlSession.insert("saveInitialTransactionDeposit", transactionParams);
-            System.out.println("거래 내역 생성 결과: " + transactionResult);
+           // System.out.println("거래 내역 생성 결과: " + transactionResult);
 
             if (transactionResult <= 0) {
                 throw new RuntimeException("거래 내역 추가에 실패했습니다.");  // 트랜잭션 롤백을 위해 예외 발생
@@ -126,20 +126,33 @@ public class BankMapper {
         return result;
     }
 	
+	//적금계좌생성 트랜젝션
 	@Transactional
-    public void processDeposit(Map<String, Object> params) {
-        // deltaAmount를 monthlyPayment로 설정하여 입금금액으로 사용
-        params.put("deltaAmount", params.get("monthlyPayment"));
+	public int createSavingWithTransaction(Map<String, Object> params) {
+		// 1. 계좌 정보 저장
+        int result = sqlSession.insert("saveSaving", params);
+        System.out.println("계좌 생성 결과: " + result);
 
-        // 1. 계좌 잔액 업데이트
-        sqlSession.update("updateAccountBalance", params);
-        
-        // 2. 거래 내역 추가
-        sqlSession.insert("insertTransactionHistory", params);
+        // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
+        if (result > 0) {
+            Map<String, Object> transactionParams = Map.of(
+                "productAccount",params.get("productAccount"),
+                "deltaAmount", 0,
+                "balance", 0,
+                "type", "개설",
+                "memo", "적금 계좌 개설"
+            );
+            int transactionResult = sqlSession.insert("saveInitialTransactionSaving", transactionParams);
+            System.out.println("거래 내역 생성 결과: " + transactionResult);
+
+            if (transactionResult <= 0) {
+                throw new RuntimeException("거래 내역 추가에 실패했습니다.");  // 트랜잭션 롤백을 위해 예외 발생
+            }
+        }
+
+        return result;
     }
-	
-	
-	
+
 	
 	
 }
