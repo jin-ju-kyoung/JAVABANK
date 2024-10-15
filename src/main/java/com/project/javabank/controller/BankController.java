@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -201,9 +202,17 @@ public class BankController {
 		    
 		 // 이체 한도 확인 (10,000,000원)
 		    int transferLimit = 10000000;
-		    // 오늘의 이체 총액과 추가로 송금할 금액의 합을 확인
+		    
+		    // 1. 이체 한도 확인
 		    if (todayTransferTotal + delta > transferLimit) {
 		        model.addAttribute("msg", "이체 한도를 초과했습니다. 오늘 남은 이체 가능 금액: " + (transferLimit - todayTransferTotal) + "원" );
+		        model.addAttribute("url", "/bankMain.do");
+		        return "message";
+		    }
+		    
+		 // 2. 잔액 확인
+		    if (balance < delta) {
+		        model.addAttribute("msg", "잔액이 부족합니다. 현재 잔액: " + balance + "원");
 		        model.addAttribute("url", "/bankMain.do");
 		        return "message";
 		    }
@@ -232,6 +241,7 @@ public class BankController {
 
 		    return "message";
 		}
+		
 		
 		
 	

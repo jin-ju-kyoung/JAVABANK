@@ -59,7 +59,7 @@
                     <!-- 계좌가 없을 때 -->
                     <li class="nolist">
                         <a href="">
-                            <p>등록된 계좌가 없습니다. 얘금계좌를 추가해주세요.</p>
+                            <p>등록된 계좌가 없습니다. 예금계좌를 추가해주세요.</p>
                             <div class="img_box">
                                 <img src="/images/icons/account.png">
                             </div>

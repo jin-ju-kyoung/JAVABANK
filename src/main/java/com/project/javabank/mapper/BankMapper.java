@@ -91,9 +91,13 @@ public class BankMapper {
 	}
 	
 	public int getTodayTransferTotalAmount(String userId) {
-		
-		return sqlSession.selectOne("getTodayTransferTotalAmount",userId);
+	    Integer result = sqlSession.selectOne("getTodayTransferTotalAmount", userId);
+	    
+	    // null일 경우 기본값 0 반환
+	    return (result != null) ? result : 0;
 	}
+	
+	
 	
 	
 	
