@@ -96,7 +96,47 @@ public class BankMapper {
 	    // null일 경우 기본값 0 반환
 	    return (result != null) ? result : 0;
 	}
+	public String mainAccount(String userId) {
+		return sqlSession.selectOne("mainAccount",userId);
+	}
 	
+	@Transactional
+	public int createDepositWithTransaction(Map<String, Object> params) {
+		// 1. 계좌 정보 저장
+        int result = sqlSession.insert("saveDeposit", params);
+        System.out.println("계좌 생성 결과: " + result);
+
+        // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
+        if (result > 0) {
+            Map<String, Object> transactionParams = Map.of(
+                "productAccount",params.get("productAccount"),
+                "deltaAmount", 0,
+                "balance", params.get("monthlyPayment"),
+                "type", "개설",
+                "memo", "예금 계좌 개설"
+            );
+            int transactionResult = sqlSession.insert("saveInitialTransactionDeposit", transactionParams);
+            System.out.println("거래 내역 생성 결과: " + transactionResult);
+
+            if (transactionResult <= 0) {
+                throw new RuntimeException("거래 내역 추가에 실패했습니다.");  // 트랜잭션 롤백을 위해 예외 발생
+            }
+        }
+
+        return result;
+    }
+	
+	@Transactional
+    public void processDeposit(Map<String, Object> params) {
+        // deltaAmount를 monthlyPayment로 설정하여 입금금액으로 사용
+        params.put("deltaAmount", params.get("monthlyPayment"));
+
+        // 1. 계좌 잔액 업데이트
+        sqlSession.update("updateAccountBalance", params);
+        
+        // 2. 거래 내역 추가
+        sqlSession.insert("insertTransactionHistory", params);
+    }
 	
 	
 	

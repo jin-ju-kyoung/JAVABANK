@@ -1,5 +1,7 @@
 package com.project.javabank.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +124,7 @@ public class BankController {
 	         model.addAttribute("url", "accountList.do");
 	    } else {
 	         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
-	         model.addAttribute("url", "accountList.do");
+	         model.addAttribute("url", "bankMain.do");
 	    }
 
 	    return "message";  // 결과를 표시할 메시지 페이지로 이동
@@ -148,9 +150,62 @@ public class BankController {
 	
 	//정기예금계좌개설
 	@RequestMapping("/addDeposit.do")
-	public String addDeposit(Model model, Authentication authentication) {
+	public String addDeposit(Model model, @AuthenticationPrincipal UserDetails user) {
+		model.addAttribute("loginId", user.getUsername());
 		return"add_deposit";
 	}
+	
+	// 예금계좌개설
+		@RequestMapping("/addDepositOk.do")
+		public String addDepositOk(Model model, 
+		                           @AuthenticationPrincipal UserDetails user,
+		                           @RequestParam("productPw") String productPw, 
+		                           @RequestParam("monthlyPayment") String monthlyPayment,
+		                           @RequestParam("expiryDate") String expiryDate,
+		                           @RequestParam("interestRate") BigDecimal interestRate) {
+			
+			// String으로 받은 만기일자를 LocalDate로 변환
+	        LocalDate expiryLocalDate = LocalDate.parse(expiryDate);
+
+		    // 계좌 번호 랜덤 생성
+		    String productAccount = bankMapper.generateAccountNumber();
+
+		    // 사용자의 계좌 수 조회
+		    String depositAccount = bankMapper.mainAccount(user.getUsername());
+
+		    // 계좌 정보 Map에 저장
+		    Map<String, Object> params = new HashMap<>();
+		    params.put("productPw", productPw);              // 비밀번호
+		    params.put("productAccount", productAccount);
+		    params.put("monthlyPayment", monthlyPayment);        // 이체 한도 (숫자 값)
+		    params.put("userId", user.getUsername());        // 사용자 아이디
+		    params.put("expiryDate", expiryDate);     // 계좌 번호
+		    params.put("interestRate", interestRate);          // 주계좌 여부
+		    params.put("depositAccount", depositAccount);          // 주계좌 여부
+		    params.put("category", "예금");
+
+		    // 데이터 저장 로직 호출
+		    int res = bankMapper.createDepositWithTransaction(params);
+
+		    // 계좌 생성 후 "add_account" 페이지로 이동
+//		    model.addAttribute("accountNumber", accountNumber);
+//		    model.addAttribute("mainAccount", mainAccount);
+
+		    if (res > 0) {
+		         model.addAttribute("msg", "계좌가 성공적으로 생성되었습니다.");
+		         model.addAttribute("url", "depositList.do");
+		    } else {
+		         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
+		         model.addAttribute("url", "bankMain.do");
+		    }
+
+		    return "message";  // 결과를 표시할 메시지 페이지로 이동
+		}
+		
+		@RequestMapping("/depositList.do")
+		public String depositList(){
+			return "deposit_list";
+		}
 	
 	//입출금 송금 1단계 계좌 입력페이지
 	@RequestMapping("/transfer.do")
@@ -242,8 +297,7 @@ public class BankController {
 		    return "message";
 		}
 		
-		
-		
+		 
 	
 	
 }

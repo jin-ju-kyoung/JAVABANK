@@ -156,6 +156,40 @@
 	      AND TO_CHAR(T.updateDate, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
 	</select>
     
+    <insert id="saveDeposit" parameterType="map">
+    	INSERT INTO javabankProduct (
+            productAccount,
+            userId,
+            productPw,
+            category,
+            regDate,
+            expiryDate,
+            interestRate,
+            depositAccount
+        ) 
+        VALUES (
+            #{productAccount, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
+	        #{userId, jdbcType=VARCHAR},
+	        #{productPw, jdbcType=NUMERIC},
+	        #{category},
+	        SYSDATE,
+	        #{expiryDate},
+	        #{interestRate},
+	        #{mainAccount, jdbcType=VARCHAR}
+        )
+    </insert>
+    
+    <insert id="saveInitialTransactionDeposit">
+        INSERT INTO javabankPtransaction (productSeq, productAccount,updateDate, deltaAmount, balance, type, memo)
+        VALUES (javabankPtransaction_seq.nextval, #{productAccount}, SYSDATE, #{deltaAmount}, #{balance}, #{type}, #{memo})
+    </insert>
+    
+    <select id="mainAccount" parameterType="String" resultType="String">
+    	SELECT depositAccount 
+		FROM javabankDeposit
+		WHERE userId = #{userId}
+		  AND mainAccount = 'Y'
+    </select>
     
     
 </mapper>
