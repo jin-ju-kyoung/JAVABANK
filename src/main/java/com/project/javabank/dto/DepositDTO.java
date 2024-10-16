@@ -44,9 +44,24 @@ public class DepositDTO {
 	    private String memo;             // 적요
 	    private double deltaAmount;      // 변동 금액
 	    private double balance;
+	    private String transferredAccount;
+	    private String transferredName;
 	    
 	    
 	    
+	    
+		public String getTransferredAccount() {
+			return transferredAccount;
+		}
+		public void setTransferredAccount(String transferredAccount) {
+			this.transferredAccount = transferredAccount;
+		}
+		public String getTransferredName() {
+			return transferredName;
+		}
+		public void setTransferredName(String transferredName) {
+			this.transferredName = transferredName;
+		}
 		public double getBalance() {
 			return balance;
 		}

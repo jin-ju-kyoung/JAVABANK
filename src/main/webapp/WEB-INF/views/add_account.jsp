@@ -14,7 +14,7 @@
                 <p>통장 비밀번호 설정</p>
                 <div class="passwd_box">
                     <label>
-                        <input type="password" class="password" name="depositPw" placeholder="비밀번호 4자리 입력" maxlength="4" required oninput="checkPasswords()">
+                        <input type="password" class="password" name="depositPw" placeholder="비밀번호 4자리 입력" maxlength="4" required oninput="checkPasswords(); restrictToNumbers(this)">
                     </label>
                     <label>
                         <input type="password" class="password" placeholder="비밀번호확인 4자리 입력" maxlength="4" required oninput="checkPasswords()">
@@ -43,6 +43,9 @@
 
 
 	<script>
+	function restrictToNumbers(input) {
+        input.value = input.value.replace(/\D/g, ''); // 숫자가 아닌 모든 문자를 제거
+    }
 	
 	// 실시간으로 비밀번호를 확인하는 함수
     function checkPasswords() {

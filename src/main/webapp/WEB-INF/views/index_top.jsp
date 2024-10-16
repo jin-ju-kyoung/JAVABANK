@@ -15,7 +15,7 @@
 <body>
     <header>
         <div class="logo_box">
-        <a href="${pageContext.request.contextPath}/bankMain.do">
+        <a href="${pageContext.request.contextPath}/bankMain.do"></a>
             <p>java<em>bank</em></p>
         </div>
 

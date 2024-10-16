@@ -40,7 +40,7 @@
 					                <input type="hidden" name="balance" value="${account.balance}">
 					                <input type="hidden" name="type" value="${account.type}">
 					                <input type="hidden" name="deltaAmount" value="${account.deltaAmount}">
-					                <button type="button">조회</button>
+					                <button type="button" onclick="window.location.href='/accountList.do?depositAccount=${account.depositAccount}'">조회</button>
 					                <button type="submit">이체</button>
 					            </form>
 					        </div>
@@ -78,7 +78,7 @@
 								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
-                                <button type="button">조회</button>
+                                <button type="button" onclick="window.location.href='/depositList.do?productAccount=${deposit.productAccount}'">조회</button>
                                 <button type="button">이체</button>
                             </div>
                         </li>
@@ -114,7 +114,7 @@
 								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
-                                <button type="button">조회</button>
+                                <button type="button" onclick="window.location.href='/savingList.do?productAccount=${saving.productAccount}'">조회</button>
                                 <button type="button">이체</button>
                             </div>
                         </li>

@@ -133,10 +133,11 @@ public class BankController {
 		
 		//입출금계좌리스트 페이지 이동
 		@RequestMapping("/accountList.do")
-		public String accountList(Model model, @AuthenticationPrincipal UserDetails user) {
+		public String accountList(Model model, @AuthenticationPrincipal UserDetails user, @RequestParam("depositAccount") String depositAccount) {
 			model.addAttribute("loginId", user.getUsername());
 			
-			
+			List<DepositDTO> account = bankMapper.getAccountByAccountNumber(depositAccount);
+			model.addAttribute("accountList",account);
 			
 			return"account_list";
 		}

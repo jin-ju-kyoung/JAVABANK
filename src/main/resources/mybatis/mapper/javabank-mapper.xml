@@ -223,5 +223,19 @@
         VALUES (javabankPtransaction_seq.nextval, #{productAccount}, SYSDATE, #{deltaAmount}, #{balance}, #{type}, #{memo})
     </insert>
     
+    <select id="getAccountByAccountNumber" parameterType="String" resultType="DepositDTO">
+    	SELECT d.*,t.*
+		FROM 
+		    javabankDeposit d
+		FULL JOIN 
+		    javabankDtransaction t
+		ON 
+		    d.depositAccount = t.depositAccount
+		WHERE 
+		    (d.depositAccount = #{depositAccount} OR t.depositAccount = #{depositAccount})
+    AND updateDate >= ADD_MONTHS(SYSDATE, -1)  <!-- 최근 1개월 내 거래만 조회 -->
+    ORDER BY updateDate DESC
+    </select>
+    
     
 </mapper>
