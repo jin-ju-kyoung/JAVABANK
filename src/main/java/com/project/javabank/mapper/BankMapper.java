@@ -156,6 +156,10 @@ public class BankMapper {
 	public List<DepositDTO> getAccountByAccountNumber(String depositAccount){
 		return sqlSession.selectList("getAccountByAccountNumber", depositAccount);
 	}
+	
+	public List<DepositDTO> getDepositByAccountNumber(String productAccount){
+		return sqlSession.selectList("getDepositByAccountNumber", productAccount);
+	}
 
 	
 }

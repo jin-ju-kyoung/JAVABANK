@@ -7,7 +7,7 @@
     <section id="account_list" class="content">
         <div class="info_box bg_yellow">
             <div class="txt_box">
-                <p class="account_name">${accountList.category}</p>
+                <p class="account_name">${category}</p>
                 <p class="account_number">${depositAccount}</p>
                 <p class="account_amount"><fmt:formatNumber value="${balance}"/>원</p>
             </div>
@@ -31,6 +31,11 @@
             </div>
             
             <ul class="account_list">
+            <c:choose>
+            <c:when test="${empty accountList}">
+                <li>이체 내역이 없습니다.</li>
+            </c:when>
+            <c:otherwise>
             <c:forEach var="account" items="${accountList}">
                 <li class="account_items">
                     <div class="txt_box">
@@ -46,7 +51,9 @@
                     </div>
                 </li>
             </c:forEach>
-            </ul>
+          </c:otherwise>
+        </c:choose>
+        </ul>
         </div>
     </section>
     <!-- e: content -->

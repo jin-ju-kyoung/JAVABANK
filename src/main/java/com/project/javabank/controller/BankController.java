@@ -133,13 +133,48 @@ public class BankController {
 		
 		//입출금계좌리스트 페이지 이동
 		@RequestMapping("/accountList.do")
-		public String accountList(Model model, @AuthenticationPrincipal UserDetails user, @RequestParam("depositAccount") String depositAccount) {
+		public String accountList(Model model, @AuthenticationPrincipal UserDetails user, @RequestParam("depositAccount") String depositAccount,
+									@RequestParam("category") String category,
+									@RequestParam("balance") String balance) {
 			model.addAttribute("loginId", user.getUsername());
 			
 			List<DepositDTO> account = bankMapper.getAccountByAccountNumber(depositAccount);
 			model.addAttribute("accountList",account);
+			model.addAttribute("category",category);
+			model.addAttribute("balance",balance);
+			model.addAttribute("depositAccount",depositAccount);
 			
 			return"account_list";
+		}
+		
+		//입출금계좌리스트 페이지 이동
+		@RequestMapping("/depositList.do")
+		public String depositList(Model model, @AuthenticationPrincipal UserDetails user, @RequestParam("productAccount") String productAccount,
+									@RequestParam("category") String category,
+									@RequestParam("balance") String balance) {
+			model.addAttribute("loginId", user.getUsername());
+			
+			List<DepositDTO> deposit = bankMapper.getDepositByAccountNumber(productAccount);
+			model.addAttribute("depositList",deposit);
+			model.addAttribute("category",category);
+			model.addAttribute("balance",balance);
+			model.addAttribute("productAccount",productAccount);
+			
+			return"deposit_list";
+		}
+		
+		@RequestMapping("/savingList.do")
+		public String savingList(Model model, @AuthenticationPrincipal UserDetails user, @RequestParam("productAccount") String productAccount,
+							@RequestParam("category") String category,
+							@RequestParam("balance") String balance) {
+				model.addAttribute("loginId", user.getUsername());
+				
+				List<DepositDTO> deposit = bankMapper.getDepositByAccountNumber(productAccount);
+				model.addAttribute("depositList",deposit);
+				model.addAttribute("category",category);
+				model.addAttribute("balance",balance);
+				model.addAttribute("productAccount",productAccount);
+			return "saving_list";
 		}
 		
 	
@@ -195,10 +230,7 @@ public class BankController {
 			    return "message";  // 결과를 표시할 메시지 페이지로 이동
 			}
 	
-	@RequestMapping("/savingList.do")
-	public String savingList(){
-		return "saving_list";
-	}
+	
 	
 	//정기예금계좌개설
 	@RequestMapping("/addDeposit.do")
@@ -254,11 +286,7 @@ public class BankController {
 		    return "message";  // 결과를 표시할 메시지 페이지로 이동
 		}
 		
-		@RequestMapping("/depositList.do")
-		public String depositList(){
-			return "deposit_list";
-		}
-	
+		
 	//입출금 송금 1단계 계좌 입력페이지
 	@RequestMapping("/transfer.do")
 	public String transfer(Model model, HttpSession session,

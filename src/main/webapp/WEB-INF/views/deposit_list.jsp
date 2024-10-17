@@ -1,13 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ include file="index_top.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
     <!-- s: content -->
     <section id="account_list" class="content">
         <div class="info_box bg_yellow">
             <div class="txt_box">
-                <p class="account_name">계좌명(입출금/예금/적금)</p>
-                <p class="account_number">0000-0000-0000-0000</p>
-                <p class="account_amount">0원</p>
+                <p class="account_name">${category}</p>
+                <p class="account_number">${productAccount}</p>
+                <p class="account_amount"><fmt:formatNumber value="${balance}"/>원</p>
             </div>
             <div class="btn_box">
                 <button type="button">이체</button>
@@ -27,21 +29,36 @@
                     <option value="payment">출금</option>
                 </select>
             </div>
+            
             <ul class="account_list">
-                <li class="account_items">
-                    <div class="txt_box">
-                        <p class="account_date font_gray">2024.10.10 00:00:00</p>
-                        <p class="account_name">홍길동</p>
-                        <p class="account_meno font_darkgray">입출금 메모</p>
-                        <p></p>
-                    </div>
-                    <div class="account_info">
-                        <p class="account_type font_blue">입금</p>
-                        <p class="delta_amount font_blue">100,000원</p>
-                        <p class="account_balance font_darkgray">100,000원</p>
-                    </div>
-                </li>
-            </ul>
+        <c:choose>
+            <c:when test="${empty depositList}">
+                <li>이체 내역이 없습니다.</li>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="deposit" items="${depositList}">
+                    <li class="account_items">
+                        <div class="txt_box">
+                            <p class="account_date font_gray">
+                                <fmt:formatDate value="${deposit.updateDate}" pattern="yyyy-MM-dd HH:mm:ss" />
+                            </p>
+                            <p class="account_name">${deposit.type}</p>
+                            <p class="account_memo font_darkgray">${deposit.memo}</p>
+                        </div>
+                        <div class="account_info">
+                            <p class="account_type font_blue">${deposit.type}</p>
+                            <p class="delta_amount font_blue">
+                                <fmt:formatNumber value="${deposit.deltaAmount}" />원
+                            </p>
+                            <p class="account_balance font_darkgray">
+                                <fmt:formatNumber value="${deposit.balance}" />원
+                            </p>
+                        </div>
+                    </li>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
+    </ul>
         </div>
     </section>
     <!-- e: content -->

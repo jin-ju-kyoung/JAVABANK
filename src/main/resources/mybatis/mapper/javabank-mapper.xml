@@ -237,5 +237,19 @@
     ORDER BY updateDate DESC
     </select>
     
+    <select id="getDepositByAccountNumber" parameterType="String" resultType="ProductDTO">
+    	SELECT d.*,t.*
+		FROM 
+		    javabankProduct d
+		FULL JOIN 
+		    javabankPtransaction t
+		ON 
+		    d.productAccount = t.productAccount
+		WHERE 
+		    (d.productAccount = #{productAccount} OR t.productAccount = #{productAccount})
+    AND updateDate >= ADD_MONTHS(SYSDATE, -1)  <!-- 최근 1개월 내 거래만 조회 -->
+    ORDER BY updateDate DESC
+    </select>
+    
     
 </mapper>
