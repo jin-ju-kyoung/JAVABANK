@@ -52,33 +52,51 @@
 	</select>
 	
 	<select id="getAccountsByUserId" parameterType="String" resultType="DepositDTO">
-		SELECT 
-            D.depositAccount,    -- 계좌 번호
-            D.category,          -- 계좌 구분
-            T.balance,           -- 계좌 잔액
-            D.regDate,           -- 계좌 개설일
-            D.interestRate,      -- 이자율
-            D.transactionLimit,  -- 이체한도
-            D.mainAccount,       -- 주거래 여부
-            T.accountSeq,        -- 거래 번호
-            T.updateDate,        -- 거래일
-            T.type,              -- 거래 유형 (개설/입금/출금 등)
-            T.memo,              -- 적요
-            T.deltaAmount        -- 변동 금액
-        FROM 
-            javabankDeposit D
-        LEFT JOIN 
-            javabankDtransaction T 
-        ON 
-            D.depositAccount = T.depositAccount
-        WHERE 
-            D.userId = #{loginId}
-        AND 
-	        T.updateDate = (
-	            SELECT MAX(T2.updateDate)
-	            FROM javabankDtransaction T2
-	            WHERE T2.depositAccount = T.depositAccount
-	        )
+		WITH LatestTransaction AS (
+			    SELECT 
+			        depositAccount, 
+			        MAX(updateDate) AS latestUpdateDate
+			    FROM 
+			        javabankDtransaction
+			    GROUP BY 
+			        depositAccount
+			)
+			SELECT 
+			    D.depositAccount,    
+			    D.category,          
+			    T.balance,           
+			    D.regDate,           
+			    D.interestRate,      
+			    D.transactionLimit,  
+			    D.mainAccount,       
+			    T.accountSeq,        
+			    T.updateDate,        
+			    T.type,              
+			    T.memo,              
+			    T.deltaAmount        
+			FROM 
+			    javabankDeposit D
+			LEFT JOIN 
+			    LatestTransaction LT 
+			ON 
+			    D.depositAccount = LT.depositAccount
+			LEFT JOIN 
+			    javabankDtransaction T 
+			ON 
+			    D.depositAccount = T.depositAccount
+			    AND T.updateDate = LT.latestUpdateDate
+			WHERE 
+			    D.userId = #{userId}
+			    AND (
+			        D.mainAccount = 'Y' 
+			        OR D.regDate = (
+			            SELECT MAX(D2.regDate)
+			            FROM javabankDeposit D2
+			            WHERE D2.userId = D.userId
+			        )
+			    )
+			ORDER BY 
+			    D.mainAccount DESC, D.regDate DESC
 	</select>
 	
 	<select id="getDepositsByUserId" parameterType="String" resultType="ProductDTO">
@@ -250,6 +268,40 @@
     AND updateDate >= ADD_MONTHS(SYSDATE, -1)  <!-- 최근 1개월 내 거래만 조회 -->
     ORDER BY updateDate DESC
     </select>
+    
+    
+    <!-- 
+    내계좌리스트에서 사용
+    <select id="getAccountsByUserId" parameterType="String" resultType="DepositDTO">
+		SELECT 
+            D.depositAccount,   
+            D.category,          
+            T.balance,           
+            D.regDate,           
+            D.interestRate,      
+            D.transactionLimit,  
+            D.mainAccount,       
+            T.accountSeq,        
+            T.updateDate,        
+            T.type,              
+            T.memo,              
+            T.deltaAmount        -
+        FROM 
+            javabankDeposit D
+        LEFT JOIN 
+            javabankDtransaction T 
+        ON 
+            D.depositAccount = T.depositAccount
+        WHERE 
+            D.userId = #{loginId}
+        AND 
+	        T.updateDate = (
+	            SELECT MAX(T2.updateDate)
+	            FROM javabankDtransaction T2
+	            WHERE T2.depositAccount = T.depositAccount
+	        )
+	</select>
+     -->
     
     
 </mapper>

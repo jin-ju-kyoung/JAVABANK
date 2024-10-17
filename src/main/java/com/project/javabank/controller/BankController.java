@@ -121,7 +121,7 @@ public class BankController {
 
 	    if (res > 0) {
 	         model.addAttribute("msg", "계좌가 성공적으로 생성되었습니다.");
-	         model.addAttribute("url", "accountList.do");
+	         model.addAttribute("url", "bankMain.do");
 	    } else {
 	         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
 	         model.addAttribute("url", "bankMain.do");
@@ -221,7 +221,7 @@ public class BankController {
 
 			    if (res > 0) {
 			         model.addAttribute("msg", "계좌가 성공적으로 생성되었습니다.");
-			         model.addAttribute("url", "savingList.do");
+			         model.addAttribute("url", "bankMain.do");
 			    } else {
 			         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
 			         model.addAttribute("url", "bankMain.do");
@@ -277,7 +277,7 @@ public class BankController {
 
 		    if (res > 0) {
 		         model.addAttribute("msg", "계좌가 성공적으로 생성되었습니다.");
-		         model.addAttribute("url", "depositList.do");
+		         model.addAttribute("url", "bankMain.do");
 		    } else {
 		         model.addAttribute("msg", "계좌 생성에 실패했습니다.");
 		         model.addAttribute("url", "bankMain.do");
@@ -287,7 +287,7 @@ public class BankController {
 		}
 		
 		
-	//입출금 송금 1단계 계좌 입력페이지
+	//송금 1단계 계좌 입력페이지
 	@RequestMapping("/transfer.do")
 	public String transfer(Model model, HttpSession session,
 					@RequestParam("category") String category,
