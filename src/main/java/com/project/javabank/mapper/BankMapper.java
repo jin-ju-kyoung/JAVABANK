@@ -162,4 +162,8 @@ public class BankMapper {
 	}
 
 	
+	public int isValidAccount(String transferredAccount){
+		return sqlSession.selectOne("isValidAccount", transferredAccount);
+	}
+	
 }

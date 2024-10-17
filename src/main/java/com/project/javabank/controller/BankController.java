@@ -314,9 +314,16 @@ public class BankController {
 	@RequestMapping("/transferMoney.do")
 	public String transferMoney(@RequestParam("bankName") String bankName,
 	        @RequestParam("transferredAccount") String transferredAccount,
-	        HttpSession session) {
+	        HttpSession session, Model model) {
 		session.setAttribute("bankName", bankName);
         session.setAttribute("transferredAccount", transferredAccount);
+        
+        Integer accountCheck = bankMapper.isValidAccount(transferredAccount);
+
+        if (accountCheck == null || accountCheck <= 0) {
+            model.addAttribute("error", "자바뱅크에 존재하는 계좌만 송금 가능합니다. 해당 계좌는 존재하지 않습니다.");
+            return "transfer";
+        }
         
 		return "transfer_money";
 	}

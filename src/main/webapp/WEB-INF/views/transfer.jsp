@@ -8,8 +8,8 @@
             <div class="bank_info">
                 <p>송금할 계좌를 입력해주세요.</p>
                 <select class="bank" name="bankName">
-                    <option value="신한">신한</option>
-                    <option value="국민">국민</option>
+                    <option value="javabank">javabank</option>
+                   <!--  <option value="국민">국민</option>
                     <option value="기업">기업</option>
                     <option value="농협">농협</option>
                     <option value="우리">우리</option>
@@ -17,7 +17,7 @@
                     <option value="카카오뱅크">카카오뱅크</option>
                     <option value="케이뱅크">케이뱅크</option>
                     <option value="토스뱅크">토스뱅크</option>
-                    <option value="새마을">새마을</option>
+                    <option value="새마을">새마을</option> -->
                 </select>
                 <label>
                     <input type="text" name="transferredAccount" value="" placeholder="계좌번호 직접입력" required
@@ -25,6 +25,9 @@
                 </label>
                 <button class="bg_yellow" type="submit">다음</button>
             </div>
+            <c:if test="${not empty error}">
+    <p class="error" align="center">${error}</p>
+</c:if>
         </form>
 
         <div class="bank_list">

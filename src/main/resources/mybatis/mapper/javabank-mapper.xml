@@ -269,6 +269,12 @@
     ORDER BY updateDate DESC
     </select>
     
+    <select id="isValidAccount" parameterType="String" resultType="int">
+    	SELECT CASE WHEN COUNT(*) &gt; 0 THEN 1 ELSE 0 END
+FROM javabankDeposit
+WHERE depositAccount = #{transferredAccount}
+    </select>
+    
     
     <!-- 
     내계좌리스트에서 사용
