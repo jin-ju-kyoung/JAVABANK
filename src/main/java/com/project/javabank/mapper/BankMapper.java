@@ -170,5 +170,8 @@ public class BankMapper {
 		return sqlSession.selectOne("getAccountName", transferredAccount);
 	}
 	
+	public List<DepositDTO> getTransferList(String userId){
+		return sqlSession.selectList("getTransferList",userId);
+	}
 	
 }

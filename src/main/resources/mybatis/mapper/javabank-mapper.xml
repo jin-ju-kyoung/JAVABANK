@@ -288,6 +288,36 @@ WHERE depositAccount = #{transferredAccount}
 		    a.depositAccount = #{transferredAccount}
     </select>
     
+    <select id="getTransferList" parameterType="String" resultType="DepositDTO">
+    	WITH RecentWithdrawals AS (
+		    SELECT 
+		        t.transferredAccount, 
+		        t.transferredName, 
+		        MIN(t.updateDate) AS updateDate  
+		    FROM 
+		        javabankDtransaction t
+		    JOIN 
+		        javabankDeposit d 
+		    ON 
+		        t.depositAccount = d.depositAccount
+		    WHERE 
+		        d.userId = #{userId} 
+		        AND t.type = '출금'
+		    GROUP BY 
+		        t.transferredAccount, t.transferredName
+		    ORDER BY 
+		        MIN(t.updateDate) DESC
+		)
+		SELECT 
+		    rw.transferredAccount, 
+		    rw.transferredName
+		FROM 
+		    (SELECT DISTINCT transferredAccount, transferredName, ROWNUM AS rn
+		     FROM RecentWithdrawals
+		     WHERE ROWNUM &lt;= 3
+		    ) rw
+    </select>
+    
     
     <!-- 
     내계좌리스트에서 사용

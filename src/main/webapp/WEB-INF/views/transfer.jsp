@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ include file="index_top.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
     <!-- s: content -->
     <section id="transfer" class="content">
         <form name="f" action="/transferMoney.do" method="post">
@@ -26,8 +27,8 @@
                 <button class="bg_yellow" type="submit">다음</button>
             </div>
             <c:if test="${not empty error}">
-    <p class="error" align="center">${error}</p>
-</c:if>
+			    <p class="error" align="center">${error}</p>
+			</c:if>
         </form>
 
         <div class="bank_list">
@@ -36,28 +37,39 @@
                 <li>
                     <a href="javascript:;">
                         <div class="img_box">
-                            <img src="/@sources/images/icons/passbook.png">
+                            <img src="/images/icons/passbook.png">
                         </div>
                         <div class="txt_box">
-                            <p class="account_name">계좌명</p>
-                            <p class="deposit_account"><span>은행명</span>0000-0000-0000-0000</p>
+                            <p class="account_name">${category}</p>
+                            <p class="deposit_account"><span>javabank</span>${depositAccount}</p>
                         </div>
                     </a>
                 </li>
             </ul>
+            
+            
             <p>최근 이체</p>
             <ul class="recently_list account_list">
-                <li>
-                    <a href="javascript:;">
-                        <div class="img_box">
-                            <img src="/@sources/images/icons/passbook.png">
-                        </div>
-                        <div class="txt_box">
-                            <p class="account_name">홍길동</p>
-                            <p class="deposit_account"><span>은행명</span>0000-0000-0000-0000</p>
-                        </div>
-                    </a>
-                </li>
+            <c:choose>
+            	<c:when test="${empty transferList}">
+	                <li>내역이 없습니다.</li>
+	            </c:when>
+	            <c:otherwise>
+                	<c:forEach var="account" items="${transferList}">
+				        <li>
+				            <a href="javascript:;">
+				                <div class="img_box">
+				                    <img src="/images/icons/passbook.png">
+				                </div>
+				                <div class="txt_box">
+				                    <p class="account_name">${account.transferredName}</p>
+				                    <p class="deposit_account"><span>javabank</span>${account.transferredAccount}</p>
+				                </div>
+				            </a>
+				        </li>
+				    </c:forEach>
+    			</c:otherwise>
+    			</c:choose>
             </ul>
         </div>
     </section>
