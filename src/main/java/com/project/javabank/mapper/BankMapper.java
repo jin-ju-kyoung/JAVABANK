@@ -166,4 +166,9 @@ public class BankMapper {
 		return sqlSession.selectOne("isValidAccount", transferredAccount);
 	}
 	
+	public String getAccountName(String transferredAccount){
+		return sqlSession.selectOne("getAccountName", transferredAccount);
+	}
+	
+	
 }

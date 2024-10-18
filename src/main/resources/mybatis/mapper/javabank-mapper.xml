@@ -162,7 +162,7 @@
 	
 	<insert id="transferMoneyOk" >
 		INSERT INTO javabankDtransaction (accountSeq, depositAccount, deltaAmount, balance, type, memo, transferredName, transferredAccount )
-        VALUES (javabankDtransaction_seq.nextval, #{depositAccount}, #{deltaAmount}, #{balance}, '출금', #{memo, jdbcType=VARCHAR} ,'임시이름',#{transferredAccount})
+        VALUES (javabankDtransaction_seq.nextval, #{depositAccount}, #{deltaAmount}, #{balance}, '출금', #{memo, jdbcType=VARCHAR} ,#{accountName, jdbcType=VARCHAR},#{transferredAccount})
 	</insert>
 	
 	<select id="getTodayTransferTotalAmount" parameterType="String" resultType="int">
@@ -273,6 +273,19 @@
     	SELECT CASE WHEN COUNT(*) &gt; 0 THEN 1 ELSE 0 END
 FROM javabankDeposit
 WHERE depositAccount = #{transferredAccount}
+    </select>
+    
+    <select id="getAccountName" parameterType="String" resultType="String">
+    	SELECT 
+		    u.userName
+		FROM 
+		    javabankDeposit a
+		JOIN 
+		    javabankUser u
+		ON 
+		    a.userId = u.userId
+		WHERE 
+		    a.depositAccount = #{transferredAccount}
     </select>
     
     

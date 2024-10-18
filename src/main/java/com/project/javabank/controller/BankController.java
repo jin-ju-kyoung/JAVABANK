@@ -324,6 +324,9 @@ public class BankController {
             model.addAttribute("error", "자바뱅크에 존재하는 계좌만 송금 가능합니다. 해당 계좌는 존재하지 않습니다.");
             return "transfer";
         }
+        String accountName = bankMapper.getAccountName(transferredAccount);
+        session.setAttribute("accountName", accountName);
+        //System.out.println(accountName);
         
 		return "transfer_money";
 	}
@@ -367,6 +370,7 @@ public class BankController {
 			params.put("depositAccount", session.getAttribute("depositAccount"));
 			params.put("balance", newBalance);
 			params.put("transferredAccount", session.getAttribute("transferredAccount"));
+			params.put("accountName", session.getAttribute("accountName"));
 			params.put("deltaAmount", deltaAmount);
 			
 			
