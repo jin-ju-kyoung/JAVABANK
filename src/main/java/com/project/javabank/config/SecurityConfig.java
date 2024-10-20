@@ -16,7 +16,15 @@ import jakarta.servlet.DispatcherType;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+		private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
+	    public SecurityConfig(CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                CustomAccessDeniedHandler customAccessDeniedHandler) {
+				this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+				this.customAccessDeniedHandler = customAccessDeniedHandler;
+}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -41,6 +49,10 @@ public class SecurityConfig {
 						.failureUrl("/login.do?error=true")
 						.permitAll()
 			)
+			.exceptionHandling(exceptionHandling -> exceptionHandling
+	                .authenticationEntryPoint(customAuthenticationEntryPoint)  // 인증 실패 처리
+	                .accessDeniedHandler(customAccessDeniedHandler)  // 권한 실패 처리
+            )
 			.logout(Customizer.withDefaults());
 
 

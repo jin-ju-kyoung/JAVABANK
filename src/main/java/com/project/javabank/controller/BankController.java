@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -293,7 +292,7 @@ public class BankController {
 					@RequestParam("category") String category,
 				    @RequestParam("depositAccount") String depositAccount,
 				    @RequestParam("balance") String balance,
-				    @RequestParam("deltaAmount") String deltaAmount,
+				    //@RequestParam("deltaAmount") String deltaAmount,
 				    @AuthenticationPrincipal UserDetails user) {
 		
 		session.setAttribute("depositAccount", depositAccount);
@@ -302,22 +301,22 @@ public class BankController {
         
         List<DepositDTO> transferList = bankMapper.getTransferList(user.getUsername());
      // 리스트의 내용을 출력하는 디버깅 코드
-        if (transferList != null && !transferList.isEmpty()) {
-            System.out.println("Transfer List: ");
-            for (DepositDTO account : transferList) {
-                System.out.println("계좌번호: " + account.getDepositAccount());
-                System.out.println("이체 이름: " + account.getTransferredName());
-                System.out.println("이체 계좌: " + account.getTransferredAccount());
-                System.out.println("카테고리: " + account.getCategory());
-                System.out.println("등록 날짜: " + account.getRegDate());
-                System.out.println("이자율: " + account.getInterestRate());
-                System.out.println("이체 한도: " + account.getTransactionLimit());
-                System.out.println("주계좌 여부: " + account.getMainAccount());
-                System.out.println("------------------------------");
-            }
-        } else {
-            System.out.println("이체 내역이 없습니다.");
-        }
+//        if (transferList != null && !transferList.isEmpty()) {
+//            System.out.println("Transfer List: ");
+//            for (DepositDTO account : transferList) {
+//                System.out.println("계좌번호: " + account.getDepositAccount());
+//                System.out.println("이체 이름: " + account.getTransferredName());
+//                System.out.println("이체 계좌: " + account.getTransferredAccount());
+//                System.out.println("카테고리: " + account.getCategory());
+//                System.out.println("등록 날짜: " + account.getRegDate());
+//                System.out.println("이자율: " + account.getInterestRate());
+//                System.out.println("이체 한도: " + account.getTransactionLimit());
+//                System.out.println("주계좌 여부: " + account.getMainAccount());
+//                System.out.println("------------------------------");
+//            }
+//        } else {
+//            System.out.println("이체 내역이 없습니다.");
+//        }
 
         model.addAttribute("transferList",transferList);
         model.addAttribute("depositAccount",depositAccount);
@@ -405,6 +404,16 @@ public class BankController {
 		    return "message";
 		}
 		
+		//매달 이자 
+		 //@Scheduled(cron = "0 0 0 1 * ?") //매달 1일 자정에 실행
+		//@Scheduled(cron = "0 */1 * * * ?")
+	    public void addMonthlyInterest() {
+		        // 이자 추가 로직
+		        System.out.println("매달 계좌에 이자를 추가합니다.");
+
+		        bankMapper.addInterestToAllAccounts();
+		        
+		    }
 		 
 	
 	

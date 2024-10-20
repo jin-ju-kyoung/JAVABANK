@@ -1,5 +1,9 @@
 package com.project.javabank.mapper;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -173,5 +177,46 @@ public class BankMapper {
 	public List<DepositDTO> getTransferList(String userId){
 		return sqlSession.selectList("getTransferList",userId);
 	}
+	
+	//이자
+	public void addInterestToAllAccounts() {
+		 
+        List<ProductDTO> productAccounts = sqlSession.selectList("getAllSavingsAccounts");
+     // 각 계좌별 이자 내역을 저장할 리스트
+        List<Map<String, Object>> interestTransactions = new ArrayList<>();
+
+        for (ProductDTO account : productAccounts) {
+            // 계좌의 잔액과 이자율 가져오기
+        	 BigDecimal balance = BigDecimal.valueOf(account.getBalance()); // double -> BigDecimal
+             BigDecimal interestRate = BigDecimal.valueOf(account.getInterestRate()); // double -> BigDecimal
+            
+            // 월 이율 계산 (연이율을 12로 나눔)
+            BigDecimal monthlyInterestRate = interestRate.divide(new BigDecimal("12"), 10, RoundingMode.HALF_UP);
+            
+            // 월 이자 계산 (잔액 * 월 이율)
+            BigDecimal interest = balance.multiply(monthlyInterestRate).setScale(2, RoundingMode.HALF_UP);
+            
+            // 이자를 잔액에 더함
+            BigDecimal updatedBalance = balance.add(interest);
+            
+
+         // 이자 정보를 거래 내역 테이블에 기록하기 위한 매개변수 설정
+            Map<String, Object> params = new HashMap<>();
+            params.put("productAccount", account.getProductAccount());  // 계좌번호
+            params.put("updateDate", new java.util.Date());  // 현재 날짜를 변동일자로 사용
+            params.put("type", "이자입금");  // 거래 유형: 이자입금
+            params.put("memo", "월 이자 지급");  // 적요
+            params.put("deltaAmount", interest);  // 변동 금액 (이자)
+            params.put("balance", updatedBalance);  // 이자 적용 후 잔액
+
+         // 리스트에 이자 입금 내역 추가
+            interestTransactions.add(params);
+        }
+
+        // 모든 이자 내역을 한 번에 DB에 삽입
+        sqlSession.insert("insertInterestTransactions", interestTransactions);
+        System.out.println("이자가 추가되었습니다");
+    }
+
 	
 }

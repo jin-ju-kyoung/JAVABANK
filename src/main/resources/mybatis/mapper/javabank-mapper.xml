@@ -318,6 +318,53 @@ WHERE depositAccount = #{transferredAccount}
 		    ) rw
     </select>
     
+    <select id="getAllSavingsAccounts" resultType="ProductDTO">
+    SELECT 
+        p.productAccount,                
+        p.category,                      
+        p.interestRate,                  
+        t.updateDate,                    
+        t.type,                          
+        t.deltaAmount,                   
+        t.balance                        
+    FROM 
+        javabankProduct p
+    JOIN 
+        javabankPtransaction t 
+        ON p.productAccount = t.productAccount
+    WHERE 
+        p.expiryDate >= SYSDATE 
+        AND t.updateDate = (
+            SELECT MAX(t2.updateDate) 
+            FROM javabankPtransaction t2 
+            WHERE t2.productAccount = p.productAccount
+        )
+</select>
+    
+    <insert id="insertInterestTransactions" parameterType="list">
+    <foreach collection="list" item="account">
+        INSERT INTO javabankPtransaction (
+            productSeq,           -- 이체번호 (PK)
+            productAccount,       -- 계좌번호 (FK)
+            updateDate,           -- 변동일자
+            type,                 -- 구분 (이자입금)
+            memo,                 -- 적요 (예: 월 이자 지급)
+            deltaAmount,          -- 변동금액 (이자 금액)
+            balance               -- 잔액 (이자 적용 후 잔액)
+        ) 
+        VALUES (
+            javabankDtransaction_seq.NEXTVAL,  -- 시퀀스를 사용한 자동 증가
+            #{account.productAccount},  
+            #{account.updateDate},      
+            #{account.type},            
+            #{account.memo},            
+            #{account.deltaAmount},     
+            #{account.balance}          
+        )
+    </foreach>
+</insert>
+
+    
     
     <!-- 
     내계좌리스트에서 사용

@@ -12,7 +12,13 @@
                 <p class="account_amount"><fmt:formatNumber value="${balance}"/>원</p>
             </div>
             <div class="btn_box">
-                <button type="button">이체</button>
+                <form action="/transfer.do" method="POST">
+		            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+		                <input type="hidden" name="category" value="${category}">
+		                <input type="hidden" name="depositAccount" value="${depositAccount}">
+		                <input type="hidden" name="balance" value="${balance}">
+		                <button type="submit">이체</button>
+		            </form>
             </div>
         </div>
 

@@ -78,8 +78,17 @@
 								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
+                            
+                             <form action="/transfer.do" method="POST">
+					            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+					                <input type="hidden" name="category" value="${deposit.category}">
+					                <input type="hidden" name="depositAccount" value="${deposit.productAccount}">
+					                <input type="hidden" name="balance" value="${deposit.balance}">
                                 <button type="button" onclick="window.location.href='/depositList.do?productAccount=${deposit.productAccount}&category=${deposit.category}&balance=${deposit.balance}'">조회</button>
-                                <button type="button">이체</button>
+                                <button type="submit">이체</button>
+                             </form>
+                             
+                             
                             </div>
                         </li>
                     </c:forEach>
@@ -114,8 +123,14 @@
 								<!-- <p class="account_transaction">최근 거래: ( <fmt:formatNumber value="" />원 )</p> -->
                             </div>
                             <div class="btn_box">
+                            <form action="/transfer.do" method="POST">
+					            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+					                <input type="hidden" name="category" value="${saving.category}">
+					                <input type="hidden" name="depositAccount" value="${saving.productAccount}">
+					                <input type="hidden" name="balance" value="${saving.balance}">
                                 <button type="button" onclick="window.location.href='/savingList.do?productAccount=${saving.productAccount}&category=${saving.category}&balance=${saving.balance}'">조회</button>
-                                <button type="button">이체</button>
+                                <button type="submit">이체</button>
+                            </form>
                             </div>
                         </li>
                     </c:forEach>
