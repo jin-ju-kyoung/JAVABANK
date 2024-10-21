@@ -181,16 +181,15 @@ public class BankMapper {
 	//이자
 	public void addInterestToAllAccounts() {
 		 
+		//예,적금 계좌 이자
         List<ProductDTO> productAccounts = sqlSession.selectList("getAllSavingsAccounts");
-     // 각 계좌별 이자 내역을 저장할 리스트
-        List<Map<String, Object>> interestTransactions = new ArrayList<>();
 
         for (ProductDTO account : productAccounts) {
             // 계좌의 잔액과 이자율 가져오기
         	 BigDecimal balance = BigDecimal.valueOf(account.getBalance()); // double -> BigDecimal
-             BigDecimal interestRate = BigDecimal.valueOf(account.getInterestRate()); // double -> BigDecimal
-            
-            // 월 이율 계산 (연이율을 12로 나눔)
+        	 BigDecimal interestRate = BigDecimal.valueOf(account.getInterestRate()).divide(new BigDecimal("100"));
+
+             // 월 이율 계산 (연이율을 12로 나눔)
             BigDecimal monthlyInterestRate = interestRate.divide(new BigDecimal("12"), 10, RoundingMode.HALF_UP);
             
             // 월 이자 계산 (잔액 * 월 이율)
@@ -209,13 +208,46 @@ public class BankMapper {
             params.put("deltaAmount", interest);  // 변동 금액 (이자)
             params.put("balance", updatedBalance);  // 이자 적용 후 잔액
 
-         // 리스트에 이자 입금 내역 추가
-            interestTransactions.add(params);
+         // 개별적으로 insert 쿼리 실행
+            sqlSession.insert("insertInterestTransaction", params);
+            System.out.println("예,적금이자가 추가되었습니다");
         }
+        
+        //입출금계좌 이자
+        List<DepositDTO> depositAccounts = sqlSession.selectList("getAllAccounts");
 
-        // 모든 이자 내역을 한 번에 DB에 삽입
-        sqlSession.insert("insertInterestTransactions", interestTransactions);
-        System.out.println("이자가 추가되었습니다");
+        for (DepositDTO dAccount : depositAccounts) {
+            // 계좌의 잔액과 이자율 가져오기
+        	 BigDecimal balance = BigDecimal.valueOf(dAccount.getBalance()); // double -> BigDecimal
+        	 BigDecimal interestRate = BigDecimal.valueOf(dAccount.getInterestRate()).divide(new BigDecimal("100"));
+
+             // 월 이율 계산 (연이율을 12로 나눔)
+            BigDecimal monthlyInterestRate = interestRate.divide(new BigDecimal("12"), 10, RoundingMode.HALF_UP);
+            
+            // 월 이자 계산 (잔액 * 월 이율)
+            BigDecimal interest = balance.multiply(monthlyInterestRate).setScale(2, RoundingMode.HALF_UP);
+            
+            // 이자를 잔액에 더함
+            BigDecimal updatedBalance = balance.add(interest);
+            
+
+         // 이자 정보를 거래 내역 테이블에 기록하기 위한 매개변수 설정
+            Map<String, Object> params = new HashMap<>();
+            params.put("depositAccounts", dAccount.getDepositAccount());  // 계좌번호
+            params.put("updateDate", new java.util.Date());  // 현재 날짜를 변동일자로 사용
+            params.put("type", "이자입금");  // 거래 유형: 이자입금
+            params.put("memo", "월 이자 지급");  // 적요
+            params.put("deltaAmount", interest);  // 변동 금액 (이자)
+            params.put("balance", updatedBalance);  // 이자 적용 후 잔액
+            params.put("transferredName", "javabank");  // 이자 적용 후 잔액
+
+         // 개별적으로 insert 쿼리 실행
+            sqlSession.insert("insertInterest", params);
+            System.out.println("입출금이자가 추가되었습니다");
+        }
+        
+        
+       
     }
 
 	

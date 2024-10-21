@@ -100,34 +100,56 @@
 	</select>
 	
 	<select id="getDepositsByUserId" parameterType="String" resultType="ProductDTO">
-			SELECT 
-		        P.productAccount,   -- 계좌 번호
-		        P.productPw,        -- 계좌 비밀번호
-		        P.userId,           -- 아이디
-		        P.category,         -- 상품 구분 (정기예금/정기적금)
-		        P.autoTransferDate, -- 자동이체일
-		        P.monthlyPayment,   -- 월납입 금액
-		        P.regDate,          -- 계좌 개설일
-		        P.expiryDate,       -- 만기일자
-		        P.interestRate,     -- 이자율
-		        P.depositAccount,   -- 자동이체 통장
-		        T.productSeq,       -- 이체 번호
-		        T.updateDate,       -- 변동일자
-		        T.type,             -- 거래 구분
-		        T.memo,             -- 적요
-		        T.deltaAmount,      -- 변동 금액
-		        T.balance           -- 잔액
-		    FROM 
-		        javabankProduct P
-		    LEFT JOIN 
-		        javabankPtransaction T 
-		    ON 
-		        P.productAccount = T.productAccount
-		    WHERE 
-		        P.category = '예금'  -- 정기예금만 조회
-		    AND 
-		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
-	</select>
+			WITH RankedTransactions AS (
+    SELECT 
+        P.productAccount,    -- 계좌 번호
+        P.productPw,         -- 계좌 비밀번호
+        P.userId,            -- 아이디
+        P.category,          -- 상품 구분 (정기예금/정기적금)
+        P.autoTransferDate,  -- 자동이체일
+        P.monthlyPayment,    -- 월납입 금액
+        P.regDate,           -- 계좌 개설일
+        P.expiryDate,        -- 만기일자
+        P.interestRate,      -- 이자율
+        P.depositAccount,    -- 자동이체 통장
+        T.productSeq,        -- 이체 번호
+        T.updateDate,        -- 변동일자
+        T.type,              -- 거래 구분
+        T.memo,              -- 적요
+        T.deltaAmount,       -- 변동 금액
+        T.balance,           -- 잔액
+        ROW_NUMBER() OVER (PARTITION BY P.productAccount ORDER BY T.updateDate DESC) AS rn
+        -- 각 계좌별로 최신 트랜잭션에 순번을 매김
+    FROM 
+        javabankProduct P
+    INNER JOIN 
+        javabankPtransaction T
+    ON 
+        P.productAccount = T.productAccount
+    WHERE 
+        P.category = '예금'          -- 정기예금만 조회
+        AND P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
+)
+SELECT 
+    productAccount,    -- 계좌 번호
+    productPw,         -- 계좌 비밀번호
+    userId,            -- 아이디
+    category,          -- 상품 구분 (정기예금/정기적금)
+    autoTransferDate,  -- 자동이체일
+    monthlyPayment,    -- 월납입 금액
+    regDate,           -- 계좌 개설일
+    expiryDate,        -- 만기일자
+    interestRate,      -- 이자율
+    depositAccount,    -- 자동이체 통장
+    productSeq,        -- 이체 번호
+    updateDate,        -- 변동일자
+    type,              -- 거래 구분
+    memo,              -- 적요
+    deltaAmount,       -- 변동 금액
+    balance            -- 잔액
+FROM RankedTransactions
+WHERE rn = 1  -- 각 계좌에 대해 가장 최신의 트랜잭션만 선택
+</select>
 	
 	
 	<select id="getSavingsByUserId" parameterType="String" resultType="ProductDTO">
@@ -341,28 +363,72 @@ WHERE depositAccount = #{transferredAccount}
         )
 </select>
     
-    <insert id="insertInterestTransactions" parameterType="list">
-    <foreach collection="list" item="account">
+    <insert id="insertInterestTransaction" parameterType="map">
         INSERT INTO javabankPtransaction (
-            productSeq,           -- 이체번호 (PK)
-            productAccount,       -- 계좌번호 (FK)
-            updateDate,           -- 변동일자
-            type,                 -- 구분 (이자입금)
-            memo,                 -- 적요 (예: 월 이자 지급)
-            deltaAmount,          -- 변동금액 (이자 금액)
-            balance               -- 잔액 (이자 적용 후 잔액)
+            productSeq,           
+            productAccount,       
+            updateDate,           
+            type,                 
+            memo,                 
+            deltaAmount,          
+            balance               
         ) 
         VALUES (
-            javabankDtransaction_seq.NEXTVAL,  -- 시퀀스를 사용한 자동 증가
-            #{account.productAccount},  
-            #{account.updateDate},      
-            #{account.type},            
-            #{account.memo},            
-            #{account.deltaAmount},     
-            #{account.balance}          
+            javabankPtransaction_seq.NEXTVAL,  
+        #{productAccount, jdbcType=VARCHAR},  
+        #{updateDate, jdbcType=TIMESTAMP},      
+        #{type, jdbcType=VARCHAR},            
+        #{memo, jdbcType=VARCHAR},            
+        #{deltaAmount, jdbcType=NUMERIC},     
+        #{balance, jdbcType=NUMERIC}          
         )
-    </foreach>
 </insert>
+
+<select id="getAllAccounts" resultType="DepositDTO">
+    SELECT 
+        p.depositAccount,                
+        p.category,                      
+        p.interestRate,                  
+        t.updateDate,                    
+        t.type,                          
+        t.deltaAmount,                   
+        t.balance                        
+    FROM 
+        javabankDeposit p
+    JOIN 
+        javabankDtransaction t 
+        ON p.depositAccount = t.depositAccount
+    WHERE 
+        t.updateDate = (
+            SELECT MAX(t2.updateDate) 
+            FROM javabankDtransaction t2 
+            WHERE t2.depositAccount = p.depositAccount
+        )
+</select>
+
+<insert id="insertInterest" parameterType="map">
+        INSERT INTO javabankDtransaction (
+            accountSeq,           
+            depositAccount,
+            transferredName,       
+            updateDate,           
+            type,                 
+            memo,                 
+            deltaAmount,          
+            balance               
+        ) 
+        VALUES (
+            javabankDtransaction_seq.NEXTVAL,  
+        #{depositAccounts, jdbcType=VARCHAR},  
+        #{transferredName, jdbcType=VARCHAR},  
+        #{updateDate, jdbcType=TIMESTAMP},      
+        #{type, jdbcType=VARCHAR},            
+        #{memo, jdbcType=VARCHAR},            
+        #{deltaAmount, jdbcType=NUMERIC},     
+        #{balance, jdbcType=NUMERIC}          
+        )
+</insert>
+
 
     
     

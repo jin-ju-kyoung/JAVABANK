@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -405,15 +406,21 @@ public class BankController {
 		}
 		
 		//매달 이자 
-		 //@Scheduled(cron = "0 0 0 1 * ?") //매달 1일 자정에 실행
-		//@Scheduled(cron = "0 */1 * * * ?")
-	    public void addMonthlyInterest() {
-		        // 이자 추가 로직
-		        System.out.println("매달 계좌에 이자를 추가합니다.");
-
-		        bankMapper.addInterestToAllAccounts();
-		        
-		    }
+//		@Scheduled(cron = "0 0 0 1 * ?") //매달 1일 자정에 실행
+//	    public void addMonthlyInterest() {
+//		        // 이자 추가 로직
+//		        System.out.println("매달 계좌에 이자를 추가합니다.");
+//
+//		        bankMapper.addInterestToAllAccounts();
+//		        
+//		    }
+		@Scheduled(cron = "0 0 0 1 * ?", zone = "Asia/Seoul")  // 원하는 타임존에 맞게 설정
+		public void addMonthlyInterest() {
+		    TimeZone timeZone = TimeZone.getDefault();
+		    System.out.println("현재 타임존: " + timeZone.getID());
+		    System.out.println("매달 1일 자정에 이자를 추가합니다.");
+		    bankMapper.addInterestToAllAccounts();
+		}
 		 
 	
 	
