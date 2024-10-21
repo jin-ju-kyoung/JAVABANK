@@ -153,33 +153,55 @@
 	
 	
 	<select id="getSavingsByUserId" parameterType="String" resultType="ProductDTO">
+			WITH RankedTransactions AS (
+			    SELECT 
+			        P.productAccount,    -- 계좌 번호
+			        P.productPw,         -- 계좌 비밀번호
+			        P.userId,            -- 아이디
+			        P.category,          -- 상품 구분 (정기예금/정기적금)
+			        P.autoTransferDate,  -- 자동이체일
+			        P.monthlyPayment,    -- 월납입 금액
+			        P.regDate,           -- 계좌 개설일
+			        P.expiryDate,        -- 만기일자
+			        P.interestRate,      -- 이자율
+			        P.depositAccount,    -- 자동이체 통장
+			        T.productSeq,        -- 이체 번호
+			        T.updateDate,        -- 변동일자
+			        T.type,              -- 거래 구분
+			        T.memo,              -- 적요
+			        T.deltaAmount,       -- 변동 금액
+			        T.balance,           -- 잔액
+			        ROW_NUMBER() OVER (PARTITION BY P.productAccount ORDER BY T.updateDate DESC) AS rn
+			        -- 각 계좌별로 최신 트랜잭션에 순번을 매김
+			    FROM 
+			        javabankProduct P
+			    INNER JOIN 
+			        javabankPtransaction T
+			    ON 
+			        P.productAccount = T.productAccount
+			    WHERE 
+			        P.category = '적금'          -- 정기예금만 조회
+			        AND P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
+			)
 			SELECT 
-		        P.productAccount,   -- 계좌 번호
-		        P.productPw,        -- 계좌 비밀번호
-		        P.userId,           -- 아이디
-		        P.category,         -- 상품 구분 (정기예금/정기적금)
-		        P.autoTransferDate, -- 자동이체일
-		        P.monthlyPayment,   -- 월납입 금액
-		        P.regDate,          -- 계좌 개설일
-		        P.expiryDate,       -- 만기일자
-		        P.interestRate,     -- 이자율
-		        P.depositAccount,   -- 자동이체 통장
-		        T.productSeq,       -- 이체 번호
-		        T.updateDate,       -- 변동일자
-		        T.type,             -- 거래 구분
-		        T.memo,             -- 적요
-		        T.deltaAmount,      -- 변동 금액
-		        T.balance           -- 잔액
-		    FROM 
-		        javabankProduct P
-		    LEFT JOIN 
-		        javabankPtransaction T 
-		    ON 
-		        P.productAccount = T.productAccount
-		    WHERE 
-		        P.category = '적금'  -- 정기예금만 조회
-		    AND 
-		        P.userId = #{loginId}     -- 해당 사용자의 계좌만 조회
+			    productAccount,    -- 계좌 번호
+			    productPw,         -- 계좌 비밀번호
+			    userId,            -- 아이디
+			    category,          -- 상품 구분 (정기예금/정기적금)
+			    autoTransferDate,  -- 자동이체일
+			    monthlyPayment,    -- 월납입 금액
+			    regDate,           -- 계좌 개설일
+			    expiryDate,        -- 만기일자
+			    interestRate,      -- 이자율
+			    depositAccount,    -- 자동이체 통장
+			    productSeq,        -- 이체 번호
+			    updateDate,        -- 변동일자
+			    type,              -- 거래 구분
+			    memo,              -- 적요
+			    deltaAmount,       -- 변동 금액
+			    balance            -- 잔액
+			FROM RankedTransactions
+			WHERE rn = 1  -- 각 계좌에 대해 가장 최신의 트랜잭션만 선택
 	</select>
 	
 	<insert id="transferMoneyOk" >
