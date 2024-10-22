@@ -246,9 +246,50 @@ public class BankMapper {
             System.out.println("입출금이자가 추가되었습니다");
         }
         
-        
-       
     }
+	
+	//적금 자동이체
+	@Transactional
+	public void checkMonthlySaving() {
+		//1. 오늘 날짜에 맞는 등록된 적금계좌 정보 들고오기
+		List<ProductDTO> transfers = sqlSession.selectList("getTodayTransfers()");
+        
+		//2. 각 계좌에 대해 자동이체
+        for (ProductDTO product : transfers) {
+        	DepositDTO mainAccount = sqlSession.selectOne("getMainAccount",product.getUserId());
+        	
+        	double amount = product.getMonthlyPayment();
+        	double balance = mainAccount.getBalance();
+        	String mainDepositAccount = mainAccount.getDepositAccount();
+        	
+        	if(balance < amount) {
+        		System.out.println("잔액이 부족하여 이체가 불가능합니다: 사용자 " + product.getUserId());
+        		continue;
+        	}
+        	
+        	 Map<String, Object> params = new HashMap<>();
+        	 params.put("depositAccount", mainDepositAccount);
+        	 params.put("transferredAccount", product.getDepositAccount());
+        	 params.put("transferredName", "적금자동이체");
+        	 params.put("deltaAmount", amount);
+        	 //params.put("updateDate", new java.util.Date());
+        	 params.put("type", "자동이체 출금");
+        	
+        	//주거래 입출금 계좌에서 출금
+        	int withdrawResult = sqlSession.insert("withdrawFromMainAccount",params);
+            if (withdrawResult == 0) {
+                throw new RuntimeException("출금 처리에 실패했습니다: 사용자 " + product.getUserId());
+            }
+            
+            
+        	Map<String, Object> params = new HashMap<>();
+        	params.put("productAccount", schedule.getProductAccount());
+        	params.put("updateDate", new java.util.Date());
+        	params.put("type", "자동이체");
+        	params.put("memo", "매달 정기적금 자동이체");
+            performTransfer(schedule);
+        }
+	}
 
 	
 }

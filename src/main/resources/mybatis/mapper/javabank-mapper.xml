@@ -451,7 +451,57 @@ WHERE depositAccount = #{transferredAccount}
         )
 </insert>
 
+<!-- 자동이체 -->
 
+	<select id="getTodayTransfers" resultType="ProductDTO">
+		SELECT * 
+		FROM javabankProduct 
+		WHERE TO_CHAR(SYSDATE, 'DD') = LPAD(autoTransferDate, 2, '0')
+	</select>
+	
+	<select id="getMainAccount" parameterType="String" resultType="DepositDTO">
+		SELECT 
+		    d.depositAccount,               -- 입출금 계좌 번호
+		    d.userId,                       -- 사용자 ID
+		    t.balance                       -- 잔액 (이체 내역 테이블에서 가져옴)
+		FROM 
+		    javabankDeposit d
+		JOIN 
+		    javabankDtransaction t
+		ON 
+		    d.depositAccount = t.depositAccount   -- 입출금 계좌 번호를 기준으로 조인
+		WHERE 
+		    d.userId = #{userId}
+		    AND d.mainAccount ='Y'
+	</select>
+	
+	<insert id="withdrawFromMainAccount" parameterType="String">
+		INSERT INTO javabankDtransaction (
+		    accountSeq, 
+		    depositAccount, 
+		    transferredAccount, 
+		    transferredName, 
+		    updateDate, 
+		    type, 
+		    deltaAmount, 
+		    balance
+		)
+		SELECT 
+		    javabankDtransaction_seq.NEXTVAL,  -- 이체번호 (시퀀스 사용)
+		    #{depositAccount},                 -- 입출금 계좌 번호
+		    #{transferredAccount},             -- 이체 대상 계좌
+		    #{transferredName},                -- 이체 대상 이름
+		    SYSDATE,                           -- 변동일자 (현재 시간)
+		    #{type},                            -- 이체 타입 ('출금')
+		    #{amount},                        -- 변동 금액 (출금이므로 음수)
+		    balance - #{amount}                -- 기존 잔액에서 출금 금액을 차감한 값
+		FROM 
+		    javabankDeposit
+		WHERE 
+		    depositAccount = #{depositAccount}  -- 특정 입출금 계좌
+		    AND balance >= #{amount}
+	</insert>
+	
     
     
     <!-- 
