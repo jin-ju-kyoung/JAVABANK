@@ -252,43 +252,71 @@ public class BankMapper {
 	@Transactional
 	public void checkMonthlySaving() {
 		//1. 오늘 날짜에 맞는 등록된 적금계좌 정보 들고오기
-		List<ProductDTO> transfers = sqlSession.selectList("getTodayTransfers()");
+		List<ProductDTO> transfers = sqlSession.selectList("getTodayTransfers");
         
 		//2. 각 계좌에 대해 자동이체
         for (ProductDTO product : transfers) {
-        	DepositDTO mainAccount = sqlSession.selectOne("getMainAccount",product.getUserId());
-        	
-        	double amount = product.getMonthlyPayment();
-        	double balance = mainAccount.getBalance();
-        	String mainDepositAccount = mainAccount.getDepositAccount();
-        	
-        	if(balance < amount) {
-        		System.out.println("잔액이 부족하여 이체가 불가능합니다: 사용자 " + product.getUserId());
-        		continue;
-        	}
-        	
-        	 Map<String, Object> params = new HashMap<>();
-        	 params.put("depositAccount", mainDepositAccount);
-        	 params.put("transferredAccount", product.getDepositAccount());
-        	 params.put("transferredName", "적금자동이체");
-        	 params.put("deltaAmount", amount);
-        	 //params.put("updateDate", new java.util.Date());
-        	 params.put("type", "자동이체 출금");
-        	
-        	//주거래 입출금 계좌에서 출금
-        	int withdrawResult = sqlSession.insert("withdrawFromMainAccount",params);
-            if (withdrawResult == 0) {
-                throw new RuntimeException("출금 처리에 실패했습니다: 사용자 " + product.getUserId());
-            }
-            
-            
-        	Map<String, Object> params = new HashMap<>();
-        	params.put("productAccount", schedule.getProductAccount());
-        	params.put("updateDate", new java.util.Date());
-        	params.put("type", "자동이체");
-        	params.put("memo", "매달 정기적금 자동이체");
-            performTransfer(schedule);
+        	 DepositDTO mainAccount = sqlSession.selectOne("getMainAccount", product.getUserId());
+
+        	    if (mainAccount != null) {
+        	        // 제품의 월납입금액과 계좌 잔액 및 계좌 번호 사용
+        	        double amount = product.getMonthlyPayment();
+        	        double balance = mainAccount.getBalance();
+        	        String mainDepositAccount = mainAccount.getDepositAccount();
+        	        
+        	        if(balance < amount) {
+                		System.out.println("잔액이 부족하여 이체가 불가능합니다: 사용자 " + product.getUserId());
+                		continue;
+                	}
+        	        
+        	        BigDecimal balanceBD = BigDecimal.valueOf(balance);
+        	        BigDecimal amountBD = BigDecimal.valueOf(amount);
+
+        	        // BigDecimal에서 subtract() 메서드를 사용해 계산
+        	        BigDecimal newBalance = balanceBD.subtract(amountBD);
+
+        	        
+        	        Map<String, Object> params = new HashMap<>();
+               	 params.put("depositAccount", mainDepositAccount);
+               	 params.put("transferredAccount", product.getDepositAccount());
+               	 params.put("transferredName", "적금자동이체");
+               	 params.put("deltaAmount", new BigDecimal(amount));
+               	 //params.put("updateDate", new java.util.Date());
+               	 params.put("type", "자동이체 출금");
+               	 //params.put("amount", amount);
+               	 params.put("balance", newBalance);
+               	System.out.println("Params: " + params);
+               	
+               	//주거래 입출금 계좌에서 출금
+               	int withdrawResult = sqlSession.insert("withdrawFromMainAccount",params);
+                   if (withdrawResult == 0) {
+                       throw new RuntimeException("출금 처리에 실패했습니다: 사용자 " + product.getUserId());
+                   }
+                   
+               	Map<String, Object> Sparams = new HashMap<>();
+               	Sparams.put("productAccount", product.getProductAccount());
+               	Sparams.put("updateDate", new java.util.Date());
+               	Sparams.put("type", "자동이체");
+               	Sparams.put("memo", "매달 정기적금 자동이체");
+               	params.put("amount", amount);
+                   
+                   
+                   int depositResult = sqlSession.insert("depositToProductAccount", Sparams);
+                   if (depositResult == 0) {
+                       throw new RuntimeException("입금 처리에 실패했습니다: 사용자 " + product.getUserId());
+                   }
+               
+
+        	        // 추가 로직을 여기에 작성
+        	    } else {
+        	        // mainAccount가 없을 경우 처리 로직
+        	        System.out.println("Main account not found for user: " + product.getUserId());
+        	    }
         }
+        	
+        	
+        	 
+        System.out.println("오늘 날짜에 해당하는 적금 자동이체를 실행하였씁니다.");
 	}
 
 	

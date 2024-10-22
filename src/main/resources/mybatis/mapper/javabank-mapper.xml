@@ -461,44 +461,79 @@ WHERE depositAccount = #{transferredAccount}
 	
 	<select id="getMainAccount" parameterType="String" resultType="DepositDTO">
 		SELECT 
-		    d.depositAccount,               -- 입출금 계좌 번호
-		    d.userId,                       -- 사용자 ID
-		    t.balance                       -- 잔액 (이체 내역 테이블에서 가져옴)
-		FROM 
-		    javabankDeposit d
-		JOIN 
-		    javabankDtransaction t
-		ON 
-		    d.depositAccount = t.depositAccount   -- 입출금 계좌 번호를 기준으로 조인
-		WHERE 
-		    d.userId = #{userId}
-		    AND d.mainAccount ='Y'
+	        d.depositAccount,      -- 입출금 계좌 번호
+	        d.userId,              -- 사용자 ID
+	        t.balance              -- 최신 거래 내역의 잔액
+	    FROM 
+	        javabankDeposit d
+	    LEFT JOIN 
+	        (SELECT 
+	             t.depositAccount, 
+	             t.balance
+	         FROM 
+	             (SELECT 
+	                  depositAccount, 
+	                  balance, 
+	                  ROW_NUMBER() OVER (PARTITION BY depositAccount ORDER BY updateDate DESC) AS rn
+	              FROM 
+	                  javabankDtransaction
+	             ) t
+	         WHERE t.rn = 1  -- 각 계좌별로 최신 거래 1건만 가져옴
+	        ) t
+	    ON 
+	        d.depositAccount = t.depositAccount
+	    WHERE 
+	        d.userId = #{userId}
+	        AND d.mainAccount = 'Y'
 	</select>
 	
-	<insert id="withdrawFromMainAccount" parameterType="String">
-		INSERT INTO javabankDtransaction (
-		    accountSeq, 
-		    depositAccount, 
-		    transferredAccount, 
-		    transferredName, 
+	<insert id="withdrawFromMainAccount" parameterType="map">
+      INSERT INTO javabankDtransaction (
+        accountSeq, 
+        depositAccount, 
+        transferredAccount, 
+        transferredName, 
+        updateDate, 
+        type, 
+        deltaAmount, 
+        balance
+    )
+    SELECT 
+        javabankDtransaction_seq.NEXTVAL,  
+        #{depositAccount},                
+        #{transferredAccount, jdbcType=VARCHAR},  
+        #{transferredName, jdbcType=VARCHAR},     
+        SYSDATE,                            
+        #{type},                             
+        #{deltaAmount, jdbcType=DECIMAL},  
+        #{balance, jdbcType=DECIMAL} - #{deltaAmount, jdbcType=DECIMAL}  
+    FROM 
+        javabankDeposit 
+    WHERE 
+        depositAccount = #{depositAccount}
+</insert>
+	
+	
+	<insert id="depositToProductAccount" parameterType="map">
+		INSERT INTO javabankPtransaction (
+		    productSeq, 
+		    productAccount, 
 		    updateDate, 
 		    type, 
 		    deltaAmount, 
 		    balance
 		)
 		SELECT 
-		    javabankDtransaction_seq.NEXTVAL,  -- 이체번호 (시퀀스 사용)
-		    #{depositAccount},                 -- 입출금 계좌 번호
-		    #{transferredAccount},             -- 이체 대상 계좌
-		    #{transferredName},                -- 이체 대상 이름
+		    javabankPtransaction_seq.NEXTVAL,  -- 이체번호 (시퀀스 사용)
+		    #{productAccount},                 -- 입출금 계좌 번호
 		    SYSDATE,                           -- 변동일자 (현재 시간)
 		    #{type},                            -- 이체 타입 ('출금')
 		    #{amount},                        -- 변동 금액 (출금이므로 음수)
-		    balance - #{amount}                -- 기존 잔액에서 출금 금액을 차감한 값
+		    balance + #{amount}                -- 기존 잔액에서 출금 금액을 차감한 값
 		FROM 
-		    javabankDeposit
+		    javabankProduct
 		WHERE 
-		    depositAccount = #{depositAccount}  -- 특정 입출금 계좌
+		    productAccount = #{productAccount}  -- 특정 입출금 계좌
 		    AND balance >= #{amount}
 	</insert>
 	

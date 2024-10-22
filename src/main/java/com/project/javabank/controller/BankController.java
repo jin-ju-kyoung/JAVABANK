@@ -415,7 +415,8 @@ public class BankController {
 		}
 		
 		//적금 자동이체
-		@Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")  // 매일 자정에 실행
+		//@Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")  // 매일 자정에 실행
+		@Scheduled(cron = "0 * * * * *", zone = "Asia/Seoul")
 		public void MonthlySaving() {
 		    TimeZone timeZone = TimeZone.getDefault();
 		    System.out.println("현재 타임존: " + timeZone.getID());
