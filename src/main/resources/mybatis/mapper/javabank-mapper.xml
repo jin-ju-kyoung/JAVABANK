@@ -454,9 +454,18 @@ WHERE depositAccount = #{transferredAccount}
 <!-- 자동이체 -->
 
 	<select id="getTodayTransfers" resultType="ProductDTO">
-		SELECT * 
-		FROM javabankProduct 
-		WHERE TO_CHAR(SYSDATE, 'DD') = LPAD(autoTransferDate, 2, '0')
+		SELECT p.*, pt.balance
+    FROM javabankProduct p
+    JOIN (
+        SELECT productAccount, balance
+        FROM (
+            SELECT productAccount, balance, 
+                   ROW_NUMBER() OVER (PARTITION BY productAccount ORDER BY updateDate DESC) AS rn
+            FROM javabankPtransaction
+        ) 
+        WHERE rn = 1  -- 최신 잔액만 선택
+    ) pt ON p.productAccount = pt.productAccount
+    WHERE TO_CHAR(SYSDATE, 'DD') = LPAD(p.autoTransferDate, 2, '0')
 	</select>
 	
 	<select id="getMainAccount" parameterType="String" resultType="DepositDTO">
@@ -498,7 +507,7 @@ WHERE depositAccount = #{transferredAccount}
         deltaAmount, 
         balance
     )
-    SELECT 
+    VALUES (
         javabankDtransaction_seq.NEXTVAL,  
         #{depositAccount},                
         #{transferredAccount, jdbcType=VARCHAR},  
@@ -506,11 +515,8 @@ WHERE depositAccount = #{transferredAccount}
         SYSDATE,                            
         #{type},                             
         #{deltaAmount, jdbcType=DECIMAL},  
-        #{balance, jdbcType=DECIMAL} - #{deltaAmount, jdbcType=DECIMAL}  
-    FROM 
-        javabankDeposit 
-    WHERE 
-        depositAccount = #{depositAccount}
+        #{balance, jdbcType=DECIMAL}  -- 이미 계산된 잔액을 사용
+    )
 </insert>
 	
 	
@@ -520,21 +526,19 @@ WHERE depositAccount = #{transferredAccount}
 		    productAccount, 
 		    updateDate, 
 		    type, 
+		    memo,
 		    deltaAmount, 
 		    balance
 		)
-		SELECT 
-		    javabankPtransaction_seq.NEXTVAL,  -- 이체번호 (시퀀스 사용)
-		    #{productAccount},                 -- 입출금 계좌 번호
-		    SYSDATE,                           -- 변동일자 (현재 시간)
-		    #{type},                            -- 이체 타입 ('출금')
-		    #{amount},                        -- 변동 금액 (출금이므로 음수)
-		    balance + #{amount}                -- 기존 잔액에서 출금 금액을 차감한 값
-		FROM 
-		    javabankProduct
-		WHERE 
-		    productAccount = #{productAccount}  -- 특정 입출금 계좌
-		    AND balance >= #{amount}
+		VALUES (
+        javabankPtransaction_seq.NEXTVAL,  
+        #{productAccount},                 
+        SYSDATE,                           
+        #{type},                           
+        #{memo},                           
+        #{deltaAmount, jdbcType=DECIMAL},                  
+        #{balance, jdbcType=DECIMAL}       
+    )
 	</insert>
 	
     

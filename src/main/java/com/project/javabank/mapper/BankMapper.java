@@ -253,15 +253,22 @@ public class BankMapper {
 	public void checkMonthlySaving() {
 		//1. 오늘 날짜에 맞는 등록된 적금계좌 정보 들고오기
 		List<ProductDTO> transfers = sqlSession.selectList("getTodayTransfers");
-        
+		
+		if (transfers == null || transfers.isEmpty()) {
+	        System.out.println("오늘 자동이체할 계좌가 없습니다.");
+	        return;
+	    }
+		
 		//2. 각 계좌에 대해 자동이체
         for (ProductDTO product : transfers) {
         	 DepositDTO mainAccount = sqlSession.selectOne("getMainAccount", product.getUserId());
 
         	    if (mainAccount != null) {
         	        // 제품의 월납입금액과 계좌 잔액 및 계좌 번호 사용
+        	    	String transferredAccount = product.getProductAccount();
         	        double amount = product.getMonthlyPayment();
         	        double balance = mainAccount.getBalance();
+        	        double Sbalance = product.getBalance();
         	        String mainDepositAccount = mainAccount.getDepositAccount();
         	        
         	        if(balance < amount) {
@@ -271,14 +278,16 @@ public class BankMapper {
         	        
         	        BigDecimal balanceBD = BigDecimal.valueOf(balance);
         	        BigDecimal amountBD = BigDecimal.valueOf(amount);
+        	        BigDecimal SbalanceBD = BigDecimal.valueOf(Sbalance);
 
         	        // BigDecimal에서 subtract() 메서드를 사용해 계산
         	        BigDecimal newBalance = balanceBD.subtract(amountBD);
+        	        BigDecimal newSBalance = SbalanceBD.add(amountBD);
 
         	        
         	        Map<String, Object> params = new HashMap<>();
                	 params.put("depositAccount", mainDepositAccount);
-               	 params.put("transferredAccount", product.getDepositAccount());
+               	 params.put("transferredAccount", transferredAccount);
                	 params.put("transferredName", "적금자동이체");
                	 params.put("deltaAmount", new BigDecimal(amount));
                	 //params.put("updateDate", new java.util.Date());
@@ -294,11 +303,13 @@ public class BankMapper {
                    }
                    
                	Map<String, Object> Sparams = new HashMap<>();
-               	Sparams.put("productAccount", product.getProductAccount());
-               	Sparams.put("updateDate", new java.util.Date());
+               	Sparams.put("productAccount", transferredAccount);
+               	//Sparams.put("updateDate", new java.util.Date());
                	Sparams.put("type", "자동이체");
                	Sparams.put("memo", "매달 정기적금 자동이체");
-               	params.put("amount", amount);
+               	Sparams.put("deltaAmount", new BigDecimal(amount));
+               	Sparams.put("balance", newSBalance);
+               	System.out.println("Sparams: " + Sparams);
                    
                    
                    int depositResult = sqlSession.insert("depositToProductAccount", Sparams);
