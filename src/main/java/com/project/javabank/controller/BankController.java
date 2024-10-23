@@ -357,19 +357,19 @@ public class BankController {
 			
 			String userId = user.getUsername();
 			String balanceStr = (String) session.getAttribute("balance");
+			String account = (String) session.getAttribute("depositAccount");
 			// balance와 deltaAmount를 숫자로 변환
 		    double balance = Double.parseDouble(balanceStr); // balance는 세션에 저장된 원래 잔액
 		    double delta = Double.parseDouble(deltaAmount);  // deltaAmount는 이체할 금액
 		    
-		 // 오늘의 총 이체 금액을 DB에서 조회 (예시: bankService.getTodayTransferTotalAmount)
+		 // 오늘의 총 이체 금액을 DB에서 조회 
 		    int todayTransferTotal = bankMapper.getTodayTransferTotalAmount(userId);
-		    
-		 // 이체 한도 확인 (10,000,000원)
-		    int transferLimit = 10000000;
+		    //계좌에 맞는 이체한도 들고오기 
+		    int transferLimit = bankMapper.getTodayTransferLimit(account);
 		    
 		    // 1. 이체 한도 확인
 		    if (todayTransferTotal + delta > transferLimit) {
-		        model.addAttribute("msg", "이체 한도를 초과했습니다. 오늘 남은 이체 가능 금액: " + (transferLimit - todayTransferTotal) + "원" );
+		        model.addAttribute("msg", "이체 한도를 초과했습니다." );
 		        model.addAttribute("url", "/bankMain.do");
 		        return "message";
 		    }
@@ -492,6 +492,40 @@ public class BankController {
 		    }
 		    
 			return "my_account";
+		}
+		
+		@RequestMapping("/checkDeposit.do")
+		public String checkDeposit(@AuthenticationPrincipal UserDetails user, Model model) {
+			// 로그인 정보 꺼내기
+			String loginId = user.getUsername();
+			int depositCount = bankMapper.checkDepositByUserId(loginId);
+			if (depositCount > 0) {
+		        // 예금 상품이 이미 있는 경우 처리
+				model.addAttribute("msg", "예금계좌가 이미 존재합니다.");
+		         model.addAttribute("url", "bankMain.do");
+		    } else {
+		        // 예금 상품이 없는 경우, 예금 등록 페이지로 리다이렉트
+		    	 model.addAttribute("msg", "예금계좌 생성페이지로 이동합니다");
+		         model.addAttribute("url", "addDeposit.do");
+		    }
+			return "message";
+		}
+		
+		@RequestMapping("/checkSaving.do")
+		public String checkSaving(@AuthenticationPrincipal UserDetails user, Model model) {
+			// 로그인 정보 꺼내기
+			String loginId = user.getUsername();
+			int depositCount = bankMapper.checkSavingByUserId(loginId);
+			if (depositCount > 0) {
+		        // 예금 상품이 이미 있는 경우 처리
+				model.addAttribute("msg", "적금계좌가 이미 존재합니다.");
+		         model.addAttribute("url", "bankMain.do");
+		    } else {
+		        // 예금 상품이 없는 경우, 예금 등록 페이지로 리다이렉트
+		    	 model.addAttribute("msg", "적금계좌 생성페이지로 이동합니다");
+		         model.addAttribute("url", "addInstallmentSaving.do");
+		    }
+			return "message";
 		}
 	
 	

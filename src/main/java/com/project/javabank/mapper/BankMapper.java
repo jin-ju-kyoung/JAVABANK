@@ -100,6 +100,10 @@ public class BankMapper {
 	    // null일 경우 기본값 0 반환
 	    return (result != null) ? result : 0;
 	}
+	public int getTodayTransferLimit(String account) {
+		return sqlSession.selectOne("getTodayTransferLimit",account);
+	}
+	
 	public String mainAccount(String userId) {
 		return sqlSession.selectOne("mainAccount",userId);
 	}
@@ -352,5 +356,14 @@ public class BankMapper {
 		System.out.println("depositParams:"+depositParams);
 		return sqlSession.insert("insertRecipientBalance",depositParams);
 	}
+	
+	public int checkDepositByUserId(String loginId){
+		return sqlSession.selectOne("checkDepositByUserId",loginId);
+	}
+	
+	public int checkSavingByUserId(String loginId){
+		return sqlSession.selectOne("checkSavingByUserId",loginId);
+	}
+	
 	
 }

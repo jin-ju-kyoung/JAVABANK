@@ -217,6 +217,12 @@
 	      AND T.type = '출금'
 	      AND TO_CHAR(T.updateDate, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
 	</select>
+	
+	<select id="getTodayTransferLimit" parameterType="String" resultType="int">
+		select transactionLimit
+		from javabankDeposit
+		where depositAccount = #{account}
+	</select>
     
     <insert id="saveDeposit" parameterType="map">
     	INSERT INTO javabankProduct (
@@ -712,6 +718,20 @@ WHERE rn = 1
 	        #{balance}                           -- 입금 후 잔액
 	    )
 	</insert>
+	
+	<select id="checkDepositByUserId" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM javabankProduct
+        WHERE userId = #{userId}
+        	AND category ='예금'
+    </select>
+    
+    <select id="checkSavingByUserId" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM javabankProduct
+        WHERE userId = #{userId}
+        	AND category ='적금'
+    </select>
     
     <!-- 
     내계좌리스트에서 사용

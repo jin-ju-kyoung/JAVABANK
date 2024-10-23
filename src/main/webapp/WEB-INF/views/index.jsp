@@ -146,7 +146,7 @@
             <p class="account_tit">상품</p>
             <ul class="product_list">
                 <li>
-                    <a href="javascript:;">
+                    <a href="/checkDeposit.do">
                         <div class="img_box">
                             <img src="/images/icons/account.png">
                         </div>
@@ -155,7 +155,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="javascript:;">
+                    <a href="/checkSaving.do">
                         <div class="img_box">
                             <img src="/images/icons/account.png">
                         </div>
