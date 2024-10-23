@@ -15,8 +15,8 @@
 <body>
     <header>
         <div class="logo_box">
-        <a href="${pageContext.request.contextPath}/bankMain.do"></a>
-            <p>java<em>bank</em></p>
+        <a href="${pageContext.request.contextPath}/bankMain.do">
+            <p>java<em>bank</em></p></a>
         </div>
 
         <div class="icon_box">
@@ -28,7 +28,7 @@
                 <img src="images/icons/setting.png">
             </div>
             <ul class="setting_box" style="display: none;">
-                <li><a href="javascript:;">내계좌 모아보기</a></li>
+                <li><a href="/myAccount.do">내계좌 모아보기</a></li>
                 <li><a href="/logout.do">로그아웃</a></li>
             </ul>
         </div>

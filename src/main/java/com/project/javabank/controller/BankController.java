@@ -23,6 +23,7 @@ import com.project.javabank.dto.ProductDTO;
 import com.project.javabank.mapper.BankMapper;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.transaction.annotation.Transactional;
 
 @Controller
 public class BankController {
@@ -350,6 +351,7 @@ public class BankController {
 	
 	//입출금 송금 3단계 송금정보 디비로 전송
 		@RequestMapping("/transferMoneyOk.do")
+		@Transactional
 		public String transferMoneyOk(@RequestParam("deltaAmount") String deltaAmount,
 		        HttpSession session, Model model, @AuthenticationPrincipal UserDetails user) {
 			
@@ -394,12 +396,37 @@ public class BankController {
 			// 데이터 저장 로직 호출
 		    int res = bankMapper.transferMoneyOk(params);
 	        
-			if (res > 0) {
-		         model.addAttribute("msg", "성공적으로 송금되었습니다.");
-		         model.addAttribute("url", "bankMain.do");
+		 // 4. 입금 처리
+		    if (res > 0) {
+		        // 입금할 계좌 정보 (이체받는 계좌의 잔액 업데이트)
+		        String recipientAccount = (String) session.getAttribute("transferredAccount");
+		        double recipientBalance = bankMapper.getBalanceByAccount(recipientAccount); // 수신자 계좌의 잔액 조회
+		        
+		        double newRecipientBalance = recipientBalance + delta; // 수신자 잔액에 delta 추가
+		        //
+		        System.out.println("newRecipientBalance :"+newRecipientBalance);	
+		        
+		        Map<String, Object> depositParams = new HashMap<>();
+		        depositParams.put("depositAccount", recipientAccount);
+		        depositParams.put("balance", newRecipientBalance);
+		        depositParams.put("transferredAccount", session.getAttribute("depositAccount"));
+		        depositParams.put("deltaAmount", deltaAmount);
+		        
+		        // 입금 정보 업데이트
+		        int depositResult = bankMapper.insertRecipientBalance(depositParams);
+		        
+		        // 5. 입금이 성공적으로 완료되었는지 확인
+		        if (depositResult > 0) {
+		            model.addAttribute("msg", "성공적으로 송금되었습니다.");
+		            model.addAttribute("url", "bankMain.do");
+		        } else {
+		            // 입금 실패 시 트랜잭션 롤백
+		            throw new RuntimeException("입금 처리에 실패했습니다.");
+		        }
 		    } else {
-		         model.addAttribute("msg", "송금 실패했습니다.");
-		         model.addAttribute("url", "bankMain.do");
+		        // 출금 실패 시
+		        model.addAttribute("msg", "송금 실패했습니다.");
+		        model.addAttribute("url", "bankMain.do");
 		    }
 
 		    return "message";
@@ -424,6 +451,48 @@ public class BankController {
 		    bankMapper.checkMonthlySaving();
 		}
 		 
+		
+		//내계좌
+		@RequestMapping("/myAccount.do")
+		public String myAccountList(@AuthenticationPrincipal UserDetails user, Model model) {
+			// 로그인 정보 꺼내기
+			String loginId = user.getUsername();
+			model.addAttribute("loginId", loginId);
+			//model.addAttribute("loginRoles", user.getAuthorities());
+			
+			// 입출금 계좌 정보 조회
+		    List<DepositDTO> accountList = bankMapper.getMyAccountsByUserId(loginId);
+			
+		    if (accountList.isEmpty()) {
+		        model.addAttribute("hasAccount", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasAccount", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("accountList", accountList); // 계좌 목록을 모델에 추가
+		    }
+		    
+		    
+		    //예금 계좌 정보 조회 
+		    List<ProductDTO> depositList = bankMapper.getMyDepositsByUserId(loginId);
+			
+		    if (depositList.isEmpty()) {
+		        model.addAttribute("hasDeposit", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasDeposit", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("depositList", depositList); // 계좌 목록을 모델에 추가
+		    }
+		  System.out.println(depositList);
+		    //적금 계좌 정보 조회
+		    List<ProductDTO> InstallmentSavingsList = bankMapper.getMySavingsByUserId(loginId);
+			
+		    if (InstallmentSavingsList.isEmpty()) {
+		        model.addAttribute("hasSavings", false); // 계좌가 없으면 false 설정
+		    } else {
+		        model.addAttribute("hasSavings", true); // 계좌가 있으면 true 설정
+		        model.addAttribute("InstallmentSavingsList", InstallmentSavingsList); // 계좌 목록을 모델에 추가
+		    }
+		    
+			return "my_account";
+		}
 	
 	
 }

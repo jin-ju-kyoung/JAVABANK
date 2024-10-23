@@ -25,7 +25,11 @@
                     <c:forEach var="account" items="${accountList}">
                         <li class="account_item bg_yellow">
                             <div class="txt_box">
-                                <p class="account_name">${account.category}</p>
+                                <p class="account_name">${account.category}
+                                	<c:if test="${account.mainAccount == 'Y'}">
+                    				<span class="main_account_label">[주계좌]</span>
+                					</c:if>
+               					</p>
                                 <p class="account_number">${account.depositAccount}</p>
                                 <p class="account_amount"><fmt:formatNumber value="${account.balance}" />원</p>
 								<p class="account_transaction">최근 거래: ${account.type} ( <fmt:formatNumber value="${account.deltaAmount}" />원 )</p>
@@ -46,7 +50,6 @@
 					        </div>
                         </li>
                     </c:forEach>
-                    <button type="button" onclick="window.location.href='/addAccount.do'">계좌 추가</button>
                 </c:otherwise>
             </c:choose>
             </ul>

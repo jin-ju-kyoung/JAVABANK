@@ -331,4 +331,26 @@ public class BankMapper {
 	}
 
 	
+	//내계좌
+	public List<DepositDTO> getMyAccountsByUserId(String loginId){
+		return sqlSession.selectList("MyAccountsByUserId",loginId);
+	}
+	
+	public List<ProductDTO> getMyDepositsByUserId(String loginId){
+		return sqlSession.selectList("getMyDepositsByUserId",loginId);
+	}
+	
+	public List<ProductDTO> getMySavingsByUserId(String loginId){
+		return sqlSession.selectList("getMySavingsByUserId",loginId);
+	}
+	
+	public double getBalanceByAccount(String recipientAccount){
+		return sqlSession.selectOne("getBalanceByAccount",recipientAccount);
+	}
+	
+	public int insertRecipientBalance(Map<String, Object> depositParams){
+		System.out.println("depositParams:"+depositParams);
+		return sqlSession.insert("insertRecipientBalance",depositParams);
+	}
+	
 }
