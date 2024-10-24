@@ -47,7 +47,7 @@
 					                <input type="hidden" name="deltaAmount" value="${account.deltaAmount}">
 					                <button type="button" onclick="window.location.href='/accountList.do?depositAccount=${account.depositAccount}&category=${account.category}&balance=${account.balance}'">조회</button>
 					                <button type="submit">이체</button>
-					                <button type="button" onclick="location.href='product_delete?productAccount=${account.depositAccount}'">계좌삭제</button>
+					                <button type="button" onclick="confirmDelete('${account.depositAccount}')">계좌삭제</button>
 					            </form>
 					        </div>
                         </li>
@@ -155,4 +155,15 @@
 		if(msg){
 			alert(msg);
 		}
+		
+		function confirmDelete(depositAccount) {
+			//console.log(depositAccount);
+	        if (confirm("정말로 이 계좌를 해지하시겠습니까?")) {
+	            // 사용자가 확인을 누른 경우, 계좌 해지 요청을 보냅니다.
+	            location.href = '/accountDelete.do?depositAccount=' + depositAccount;
+	        } else {
+	            // 사용자가 취소를 누른 경우, 아무 동작도 하지 않습니다.
+	            return false;
+	        }
+	    }
 	</script>

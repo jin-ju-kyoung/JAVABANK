@@ -377,6 +377,10 @@ public class BankMapper {
 	public int checkSavingByUserId(String loginId){
 		return sqlSession.selectOne("checkSavingByUserId",loginId);
 	}
+	//입출금 해지 
+	public int accountDelete(String depositAccount) {
+		return sqlSession.update("accountDelete", depositAccount);
+	}
 	
 	
 }

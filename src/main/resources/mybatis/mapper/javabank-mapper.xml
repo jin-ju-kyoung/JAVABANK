@@ -27,7 +27,8 @@
             regDate,
             interestRate,
             transactionLimit,
-            mainAccount
+            mainAccount,
+            depositEnable
         ) 
         VALUES (
             #{accountNumber, jdbcType=VARCHAR},  <!-- 계좌 번호 값 -->
@@ -37,7 +38,8 @@
 	        SYSDATE,
 	        DEFAULT,
 	        #{accountLimit, jdbcType=NUMERIC},
-	        #{mainAccount, jdbcType=VARCHAR}
+	        #{mainAccount, jdbcType=VARCHAR},
+	        DEFAULT
         )
     </insert>
     
@@ -766,38 +768,13 @@ WHERE rn = 1
         	AND category ='적금'
     </select>
     
-    <!-- 
-    내계좌리스트에서 사용
-    <select id="getAccountsByUserId" parameterType="String" resultType="DepositDTO">
-		SELECT 
-            D.depositAccount,   
-            D.category,          
-            T.balance,           
-            D.regDate,           
-            D.interestRate,      
-            D.transactionLimit,  
-            D.mainAccount,       
-            T.accountSeq,        
-            T.updateDate,        
-            T.type,              
-            T.memo,              
-            T.deltaAmount        -
-        FROM 
-            javabankDeposit D
-        LEFT JOIN 
-            javabankDtransaction T 
-        ON 
-            D.depositAccount = T.depositAccount
-        WHERE 
-            D.userId = #{loginId}
-        AND 
-	        T.updateDate = (
-	            SELECT MAX(T2.updateDate)
-	            FROM javabankDtransaction T2
-	            WHERE T2.depositAccount = T.depositAccount
-	        )
-	</select>
-     -->
+    <update id="accountDelete" parameterType="String">
+    	UPDATE JAVABANKDEPOSIT
+		SET depositEnable = 'N'
+		WHERE depositAccount = #{depositAccount} 
+    </update>
+    
+    
     
     
 </mapper>

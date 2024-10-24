@@ -563,9 +563,16 @@ public class BankController {
 		
 		//입출금 해지
 		@RequestMapping("/accountDelete.do")
-		public String accountDelete(@RequestParam("depositAccount") String depositAccount) {
-			
-			return "";
+		public String accountDelete(@RequestParam("depositAccount") String depositAccount, Model model) {
+			int accountDelete = bankMapper.accountDelete(depositAccount);
+			if (accountDelete > 0) {
+		        // 성공적으로 삭제된 경우 메시지를 추가합니다.
+		        model.addAttribute("msg", "계좌가 성공적으로 해지되었습니다.");
+		    } else {
+		        // 실패한 경우의 메시지 처리도 추가할 수 있습니다.
+		        model.addAttribute("msg", "계좌 해지에 실패하였습니다.");
+		    }
+		    return "redirect:/bankMain.do"; // 계좌 목록 페이지로 리다이렉트
 		}
 		
 	
