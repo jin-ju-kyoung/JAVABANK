@@ -47,6 +47,7 @@
 					                <input type="hidden" name="deltaAmount" value="${account.deltaAmount}">
 					                <button type="button" onclick="window.location.href='/accountList.do?depositAccount=${account.depositAccount}&category=${account.category}&balance=${account.balance}'">조회</button>
 					                <button type="submit">이체</button>
+					                <button type="button" onclick="location.href='product_delete?productAccount=${account.depositAccount}'">계좌삭제</button>
 					            </form>
 					        </div>
                         </li>
@@ -90,6 +91,7 @@
 					                <input type="hidden" name="depositAccount" value="${deposit.productAccount}">
 					                <input type="hidden" name="balance" value="${deposit.balance}">
                                 <button type="button" onclick="window.location.href='/depositList.do?productAccount=${deposit.productAccount}&category=${deposit.category}&balance=${deposit.balance}'">조회</button>
+                                <button type="button" onclick="location.href='product_delete?productAccount=${deposit.productAccount}'">계좌삭제</button>
                               <!--   <button type="submit">이체</button> -->
                              </form>
                              
@@ -134,6 +136,7 @@
 					                <input type="hidden" name="depositAccount" value="${saving.productAccount}">
 					                <input type="hidden" name="balance" value="${saving.balance}">
                                 <button type="button" onclick="window.location.href='/savingList.do?productAccount=${saving.productAccount}&category=${saving.category}&balance=${saving.balance}'">조회</button>
+                                <button type="button" onclick="location.href='product_delete?productAccount=${saving.productAccount}'">계좌삭제</button>
                                 <!--   <button type="submit">이체</button> -->
                             </form>
                             </div>

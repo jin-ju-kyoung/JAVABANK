@@ -243,14 +243,47 @@
 	        SYSDATE,
 	        #{expiryDate},
 	        #{interestRate},
-	        #{mainAccount, jdbcType=VARCHAR}
+	        #{depositAccount, jdbcType=VARCHAR}
         )
     </insert>
+    
+    <insert id="withdrawFromAccount" parameterType="map">
+    	insert into javabankDtransaction (
+            accountSeq,           
+            depositAccount,
+            transferredAccount,       
+            updateDate,           
+            type,                 
+            memo,                 
+            deltaAmount,          
+            balance               
+        ) 
+        VALUES (
+            javabankDtransaction_seq.NEXTVAL,  
+        #{depositAccount, jdbcType=VARCHAR},  
+        #{transferredAccount, jdbcType=VARCHAR},  
+        SYSDATE,      
+        #{type, jdbcType=VARCHAR},            
+        #{memo, jdbcType=VARCHAR},            
+        #{deltaAmount, jdbcType=NUMERIC},     
+        #{balance, jdbcType=NUMERIC}          
+        )
+    </insert>
+    
+    <select id="getAccountBalance" parameterType="String" resultType="BigDecimal">
+	     SELECT balance
+	    FROM javabankDtransaction
+	    WHERE depositAccount = #{depositAccount}
+	    AND ROWNUM = 1
+	    ORDER BY updateDate DESC
+	</select>
     
     <insert id="saveInitialTransactionDeposit">
         INSERT INTO javabankPtransaction (productSeq, productAccount,updateDate, deltaAmount, balance, type, memo)
         VALUES (javabankPtransaction_seq.nextval, #{productAccount}, SYSDATE, #{deltaAmount}, #{balance}, #{type}, #{memo})
     </insert>
+    
+    
     
     <select id="mainAccount" parameterType="String" resultType="String">
     	SELECT depositAccount 

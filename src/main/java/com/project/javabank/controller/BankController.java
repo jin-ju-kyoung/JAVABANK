@@ -24,6 +24,8 @@ import com.project.javabank.mapper.BankMapper;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 
 @Controller
 public class BankController {
@@ -242,10 +244,11 @@ public class BankController {
 	
 	// 예금계좌개설
 		@RequestMapping("/addDepositOk.do")
+		@Transactional
 		public String addDepositOk(Model model, 
 		                           @AuthenticationPrincipal UserDetails user,
 		                           @RequestParam("productPw") String productPw, 
-		                           @RequestParam("monthlyPayment") String monthlyPayment,
+		                           @RequestParam("monthlyPayment") BigDecimal monthlyPayment,
 		                           @RequestParam("expiryDate") String expiryDate,
 		                           @RequestParam("interestRate") BigDecimal interestRate) {
 			
@@ -255,18 +258,47 @@ public class BankController {
 		    // 계좌 번호 랜덤 생성
 		    String productAccount = bankMapper.generateAccountNumber();
 
-		    // 사용자의 계좌 수 조회
+		    // 사용자의 주 계좌 조회
 		    String depositAccount = bankMapper.mainAccount(user.getUsername());
+		    
+		    // 주 계좌의 현재 잔액을 조회
+		    BigDecimal currentBalance = bankMapper.getAccountBalance(depositAccount);
+		    
+		 // 현재 잔액이 출금할 금액보다 적으면 출금 불가 처리
+		    if (currentBalance.compareTo(monthlyPayment) < 0) {
+		        model.addAttribute("msg", "잔액이 부족하여 출금할 수 없습니다.");
+		        model.addAttribute("url", "bankMain.do");
+		        return "message";
+		    }
+		    
+		    BigDecimal newBalance = currentBalance.subtract(monthlyPayment);
+		    
+		 // 출금 작업
+		    Map<String, Object> Dparams = new HashMap<>();
+		    Dparams.put("depositAccount", depositAccount);
+		    Dparams.put("deltaAmount", monthlyPayment);
+		    Dparams.put("balance", newBalance);
+		    Dparams.put("transferredAccount", productAccount);
+		    Dparams.put("type", "예금계좌출금");
+		    Dparams.put("memo", "정기예금계좌로 출금");
+		 
+		    int withdrawResult = bankMapper.withdrawFromAccount(Dparams);
+		 // 출금 작업이 성공했는지 확인
+		    if (withdrawResult <= 0) {
+		        model.addAttribute("msg", "출금에 실패했습니다.");
+		        model.addAttribute("url", "bankMain.do");
+		        return "message";
+		    }
 
 		    // 계좌 정보 Map에 저장
 		    Map<String, Object> params = new HashMap<>();
-		    params.put("productPw", productPw);              // 비밀번호
+		    params.put("productPw", productPw);              
 		    params.put("productAccount", productAccount);
-		    params.put("monthlyPayment", monthlyPayment);        // 이체 한도 (숫자 값)
-		    params.put("userId", user.getUsername());        // 사용자 아이디
-		    params.put("expiryDate", expiryDate);     // 계좌 번호
-		    params.put("interestRate", interestRate);          // 주계좌 여부
-		    params.put("depositAccount", depositAccount);          // 주계좌 여부
+		    params.put("monthlyPayment", monthlyPayment);        
+		    params.put("userId", user.getUsername());        
+		    params.put("expiryDate", expiryDate);    
+		    params.put("interestRate", interestRate);         
+		    params.put("depositAccount", depositAccount);          
 		    params.put("category", "예금");
 
 		    // 데이터 저장 로직 호출
@@ -434,6 +466,7 @@ public class BankController {
 		
 		//매달 이자 
 		@Scheduled(cron = "0 0 0 1 * ?", zone = "Asia/Seoul")  // 원하는 타임존에 맞게 설정
+		//@Scheduled(cron = "0 * * * * *", zone = "Asia/Seoul")
 		public void addMonthlyInterest() {
 		    TimeZone timeZone = TimeZone.getDefault();
 		    System.out.println("현재 타임존: " + timeZone.getID());
@@ -527,6 +560,14 @@ public class BankController {
 		    }
 			return "message";
 		}
+		
+		//입출금 해지
+		@RequestMapping("/accountDelete.do")
+		public String accountDelete(@RequestParam("depositAccount") String depositAccount) {
+			
+			return "";
+		}
+		
 	
 	
 }

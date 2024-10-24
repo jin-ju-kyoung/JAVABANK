@@ -62,7 +62,7 @@ public class BankMapper {
             Map<String, Object> transactionParams = Map.of(
                 "accountNumber", accountNumber,
                 "deltaAmount", 0,
-                "balance", 0,
+                "balance", 1000000, //일단 임시로 금액입금. 
                 "type", "개설",
                 "memo", "계좌 개설"
             );
@@ -100,6 +100,7 @@ public class BankMapper {
 	    // null일 경우 기본값 0 반환
 	    return (result != null) ? result : 0;
 	}
+	
 	public int getTodayTransferLimit(String account) {
 		return sqlSession.selectOne("getTodayTransferLimit",account);
 	}
@@ -108,17 +109,29 @@ public class BankMapper {
 		return sqlSession.selectOne("mainAccount",userId);
 	}
 	
+	public int withdrawFromAccount(Map<String, Object> Dparams) {
+		System.out.println("Dparams:"+Dparams);
+		return sqlSession.insert("withdrawFromAccount",Dparams);
+	}
+	
+	public BigDecimal getAccountBalance(String depositAccount) {
+		return sqlSession.selectOne("getAccountBalance",depositAccount);
+	}
+	
 	@Transactional
 	public int createDepositWithTransaction(Map<String, Object> params) {
+		System.out.println("params :"+params );
 		// 1. 계좌 정보 저장
         int result = sqlSession.insert("saveDeposit", params);
-       // System.out.println("계좌 생성 결과: " + result);
+       System.out.println("계좌 생성 결과: " + params.get("productAccount"));
+       System.out.println("계좌 생성 결과: " + params.get("balance"));
+       System.out.println("계좌 생성 결과: " + params.get("monthlyPayment"));
 
         // 2. 계좌 생성 후 초기 잔액을 0으로 설정한 거래 내역 추가
         if (result > 0) {
             Map<String, Object> transactionParams = Map.of(
                 "productAccount",params.get("productAccount"),
-                "deltaAmount", 0,
+                "deltaAmount", params.get("monthlyPayment"),
                 "balance", params.get("monthlyPayment"),
                 "type", "개설",
                 "memo", "예금 계좌 개설"
